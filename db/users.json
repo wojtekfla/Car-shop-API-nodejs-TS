@@ -1,0 +1,16 @@
+[
+  {
+    "id": "admin01",
+    "username": "admin",
+    "password": "$2b$10$yRbe4cFbi3gy/Y2GXmJQUO8dJ8gKy6qSYErWFbkLfe8UPHcN/Bk0G",
+    "role": "admin",
+    "balance": 150000
+  },
+  {
+    "id": "22d6eb36-34a0-49b2-a319-a5c18a8631aa",
+    "username": "wojtek",
+    "password": "$2b$10$cerLR6Oeloogfj/cFLgKsu9JZNl8WJIX2CbuT1vwWDneKXwto0fcm",
+    "role": "user",
+    "balance": 100000
+  }
+]
