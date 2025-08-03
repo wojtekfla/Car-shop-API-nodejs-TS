@@ -1,15 +1,15 @@
 [
   {
-    "id": "admin01",
+    "id": "1754207643031",
     "username": "admin",
-    "password": "$2b$10$yRbe4cFbi3gy/Y2GXmJQUO8dJ8gKy6qSYErWFbkLfe8UPHcN/Bk0G",
+    "password": "$2b$10$HUXt.uWXuyUdQC14/rAbXOF8hPyxYYI6Oec3QzAtgsMzwbLmC/iV6",
     "role": "admin",
     "balance": 150000
   },
   {
-    "id": "22d6eb36-34a0-49b2-a319-a5c18a8631aa",
+    "id": "1754207669700",
     "username": "wojtek",
-    "password": "$2b$10$cerLR6Oeloogfj/cFLgKsu9JZNl8WJIX2CbuT1vwWDneKXwto0fcm",
+    "password": "$2b$10$NE5G8YS/bZepiRKyzHAA9.tCHUYAh7o1r052/Ac1ogiXJApsKrTS.",
     "role": "user",
     "balance": 100000
   }

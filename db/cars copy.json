@@ -1,0 +1,92 @@
+[
+  {
+    "id": "car-1",
+    "make": "Toyota",
+    "model": "Corolla",
+    "year": 2021,
+    "price": 65000,
+    "ownerId": null,
+    "isSold": false
+  },
+  {
+    "id": "car-2",
+    "make": "Honda",
+    "model": "Civic",
+    "year": 2020,
+    "price": 61000,
+    "ownerId": null,
+    "isSold": false
+  },
+  {
+    "id": "car-3",
+    "make": "Mazda",
+    "model": "6",
+    "year": 2019,
+    "price": 58000,
+    "ownerId": "user-123",
+    "isSold": true
+  },
+  {
+    "id": "car-4",
+    "make": "Volkswagen",
+    "model": "Passat",
+    "year": 2022,
+    "price": 72000,
+    "ownerId": null,
+    "isSold": false
+  },
+  {
+    "id": "car-5",
+    "make": "Kia",
+    "model": "Sportage",
+    "year": 2021,
+    "price": 85000,
+    "ownerId": "user-456",
+    "isSold": true
+  },
+  {
+    "id": "car-6",
+    "make": "Ford",
+    "model": "Focus",
+    "year": 2020,
+    "price": 54000,
+    "ownerId": null,
+    "isSold": false
+  },
+  {
+    "id": "car-7",
+    "make": "Skoda",
+    "model": "Octavia",
+    "year": 2022,
+    "price": 79000,
+    "ownerId": null,
+    "isSold": false
+  },
+  {
+    "id": "car-8",
+    "make": "Hyundai",
+    "model": "Tucson",
+    "year": 2023,
+    "price": 99000,
+    "ownerId": "user-789",
+    "isSold": true
+  },
+  {
+    "id": "car-9",
+    "make": "Renault",
+    "model": "Megane",
+    "year": 2021,
+    "price": 67000,
+    "ownerId": null,
+    "isSold": false
+  },
+  {
+    "id": "car-10",
+    "make": "Peugeot",
+    "model": "3008",
+    "year": 2022,
+    "price": 88000,
+    "ownerId": null,
+    "isSold": false
+  }
+]
