@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import url from "node:url";
 import { Car } from "../types.js";
 import {
+	buyCar,
 	getBodyData,
 	getCarById,
 	loadCars,
@@ -129,6 +130,11 @@ export async function handleCarsRoutes(
 
 		res.statusCode = 200 // OK
 		return res.end(JSON.stringify({ success: true, deleted: deletedCar}))
+	}
+
+	if (method === 'POST' && pathname?.match(/^\/cars\/[\w-]+\/buy$/)) {
+		console.log(">>> RUTER: BUY REQUEST TRIGGERED", pathname);
+		await buyCar(req, res, pathname)
 	}
 }
 

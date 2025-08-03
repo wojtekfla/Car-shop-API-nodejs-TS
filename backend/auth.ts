@@ -10,7 +10,6 @@ const SECRET = process.env.SECRET_TOKEN ?? "domyślny_klucz";
 const EXPIRES_IN = process.env.TOKEN_EXPIRATION || "10m";
 
 const USERS_DB = path.join(process.cwd(), "db", "users.json");
-console.log('Users path', USERS_DB)
 
 interface TokenPayload {
 	id: string;

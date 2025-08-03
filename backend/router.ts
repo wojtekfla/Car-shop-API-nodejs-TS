@@ -17,7 +17,7 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse) {
 	if (
 		pathname === '/users' ||
 		pathname === '/users/delete' ||
-		pathname.match(/^\/users\/[w-]+$/)
+		pathname.match(/^\/users\/[\w-]+$/)
 	) {
 		return handleUserRoutes(req, res)
 	}
@@ -25,8 +25,8 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse) {
 	// Cars routes
 	if (
 		pathname === '/cars' ||
-		pathname.match(/^\?cars\?[w-]+$/) ||
-		pathname.match(/^\/cars\/[w-]+\/buy$/) ||
+		pathname.match(/^\?cars\?[\w-]+$/) ||
+		pathname.match(/^\/cars\/[\w-]+\/buy$/) ||
 		pathname.match(/^\/cars\/[^\/]+$/) ||
 		pathname.match(/^\/cars\/[^\/]+\/delete$/)
 	){
@@ -35,13 +35,3 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse) {
 
 	return handleStaticFiles(req, res);
 }
-
-
-	// if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/users')) {
-	// 	return handleUserRoutes(req, res);
-	// } else if (req.url?.match(/^\/users\/\w+/) && method === "PUT") {
-	// 	return handleUserRoutes(req, res)
-	// } else if (method === "DELETE" && pathname === "/users/delete") {
-	// 	return handleUserRoutes(req, res)
-	// }
-

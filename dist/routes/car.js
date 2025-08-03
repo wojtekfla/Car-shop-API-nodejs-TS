@@ -1,6 +1,6 @@
 import path from "node:path";
 import url from "node:url";
-import { getBodyData, loadCars, readDataFromJson, saveDataToJson, } from "../db.js";
+import { buyCar, getBodyData, loadCars, readDataFromJson, saveDataToJson, } from "../db.js";
 import { getCurrentUser } from "../auth.js";
 // get current path
 const __filename = url.fileURLToPath(import.meta.url);
@@ -83,9 +83,7 @@ export async function handleCarsRoutes(req, res) {
     }
     if (method === 'DELETE' && pathname?.match(/^\/cars\/[^\/]+\/delete$/)) {
         const pathnameParts = pathname.split('/');
-        console.log('pathname parts', pathnameParts);
         const carId = pathnameParts[2];
-        console.log("DELETE endpoint hit:", pathname);
         const currentUser = await getCurrentUser(req);
         if (!currentUser || currentUser.role !== "admin") {
             res.statusCode = 403; // 403 Forbidden
@@ -93,11 +91,13 @@ export async function handleCarsRoutes(req, res) {
         }
         const cars = await readDataFromJson(CARS_DB);
         const deletedCar = cars.find((c) => c.id === carId);
-        console.log('Car deleted:', deletedCar);
         const filteredCars = cars.filter((c) => c.id !== carId);
-        console.log('Now cars:', filteredCars);
         await saveDataToJson(CARS_DB, filteredCars);
-        res.statusCode = 200;
+        res.statusCode = 200; // OK
         return res.end(JSON.stringify({ success: true, deleted: deletedCar }));
+    }
+    if (method === 'POST' && pathname?.match(/^\/cars\/[\w-]+\/buy$/)) {
+        console.log(">>> RUTER: BUY REQUEST TRIGGERED", pathname);
+        await buyCar(req, res, pathname);
     }
 }

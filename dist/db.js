@@ -1,4 +1,8 @@
 import fs from "node:fs/promises";
+import path from "node:path";
+import { getCurrentUser } from "./auth.js";
+const USERS_DB = path.join(process.cwd(), "db", "users.json");
+const CARS_DB = path.join(process.cwd(), "db", "cars.json");
 // odczyt body
 export function getBodyData(req) {
     return new Promise((resolve, reject) => {
@@ -66,3 +70,43 @@ export async function getCarById(id, filePath) {
 }
 // update car
 // delete car
+// buy car
+export async function buyCar(req, res, pathname) {
+    const pathnameParts = pathname.split("/");
+    const carId = pathnameParts[2];
+    const buyer = await getCurrentUser(req);
+    if (!buyer) {
+        res.statusCode = 401; // 401 Unauthorized
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({ error: "Unauthorized" }));
+    }
+    const users = await readDataFromJson(USERS_DB);
+    const cars = await readDataFromJson(CARS_DB);
+    const boughtCar = cars.find((c) => c.id === carId);
+    if (!boughtCar) {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({ error: "Car not found" }));
+    }
+    if (boughtCar.ownerId !== null) {
+        res.statusCode = 400;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({ error: "Car already sold" }));
+    }
+    if (buyer.balance < boughtCar.price) {
+        res.statusCode = 400;
+        res.setHeader("Content-Type", "application/json");
+        return res.end(JSON.stringify({ error: "Insufficiend funds" }));
+    }
+    // Transaction
+    const buyerIndex = users.findIndex((u) => u.id === buyer.id);
+    if (buyerIndex !== -1) {
+        users[buyerIndex].balance -= boughtCar.price;
+    }
+    boughtCar.ownerId = buyer.id; // boughtCar jest referencja do cars - modyfikacja zostanie uwzgledniona 
+    await saveDataToJson(CARS_DB, cars);
+    await saveDataToJson(USERS_DB, users);
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify({ success: "Car purchased successfully" }));
+}

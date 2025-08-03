@@ -1,7 +1,12 @@
 // DB INTERACTION
-import { IncomingMessage } from "node:http";
+import { IncomingMessage, ServerResponse } from "node:http";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { Car, User } from "./types.js";
+import { getCurrentUser } from "./auth.js";
+
+const USERS_DB = path.join(process.cwd(), "db", "users.json");
+const CARS_DB = path.join(process.cwd(), "db", "cars.json");
 
 // odczyt body
 export function getBodyData(req: IncomingMessage): Promise<string> {
@@ -43,18 +48,20 @@ export async function saveDataToJson<T>(filePath: string, data: T[]) {
 	}
 }
 
-
 // CRUD for Users
 // create User
 
 // load Users
 
 // get User by Id
-export async function getUserById(id: string, filePath: string): Promise<User | null> {
-  const usersRaw = await fs.readFile(filePath, "utf-8");
-	const users = JSON.parse(usersRaw) as User[]
-	const user = users.find((u) => u.id === id)
-	return user || null
+export async function getUserById(
+	id: string,
+	filePath: string
+): Promise<User | null> {
+	const usersRaw = await fs.readFile(filePath, "utf-8");
+	const users = JSON.parse(usersRaw) as User[];
+	const user = users.find((u) => u.id === id);
+	return user || null;
 }
 
 // update User
@@ -80,3 +87,56 @@ export async function getCarById(id: string, filePath: string): Promise<Car> {
 
 // delete car
 
+// buy car
+export async function buyCar(
+	req: IncomingMessage,
+	res: ServerResponse,
+	pathname: string
+) {
+	const pathnameParts = pathname.split("/");
+	const carId = pathnameParts[2];
+
+	const buyer = await getCurrentUser(req);
+	if (!buyer) {
+		res.statusCode = 401; // 401 Unauthorized
+		res.setHeader ("Content-Type", "application/json")
+		return res.end(JSON.stringify({ error: "Unauthorized" }));
+	}
+
+	const users = await readDataFromJson<User>(USERS_DB)
+	const cars = await readDataFromJson<Car>(CARS_DB);
+
+	const boughtCar = cars.find((c) => c.id === carId);
+	if (!boughtCar) {
+		res.statusCode = 404;
+		res.setHeader ("Content-Type", "application/json")
+		return res.end(JSON.stringify({ error: "Car not found" }));
+	}
+
+	if (boughtCar.ownerId !== null) {
+		res.statusCode = 400;
+		res.setHeader ("Content-Type", "application/json")
+		return res.end(JSON.stringify({ error: "Car already sold" }));
+	}
+
+	if (buyer.balance < boughtCar.price) {
+		res.statusCode = 400;
+		res.setHeader ("Content-Type", "application/json")
+		return res.end(JSON.stringify({ error: "Insufficiend funds" }));
+	}
+
+	// Transaction
+	const buyerIndex = users.findIndex((u: User) => u.id === buyer.id);
+	if (buyerIndex !== -1) {
+		users[buyerIndex].balance -= boughtCar.price
+	}
+
+	boughtCar.ownerId = buyer.id; // boughtCar jest referencja do cars - modyfikacja zostanie uwzgledniona 
+
+	await saveDataToJson<Car>(CARS_DB, cars)
+	await saveDataToJson<User>(USERS_DB, users)
+
+	res.statusCode = 200;
+	res.setHeader ("Content-Type", "application/json")
+	return res.end(JSON.stringify({ success: "Car purchased successfully" }));
+}

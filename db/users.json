@@ -4,13 +4,13 @@
     "username": "admin",
     "password": "$2b$10$HUXt.uWXuyUdQC14/rAbXOF8hPyxYYI6Oec3QzAtgsMzwbLmC/iV6",
     "role": "admin",
-    "balance": 150000
+    "balance": 1500000
   },
   {
     "id": "1754207669700",
     "username": "wojtek",
     "password": "$2b$10$NE5G8YS/bZepiRKyzHAA9.tCHUYAh7o1r052/Ac1ogiXJApsKrTS.",
     "role": "user",
-    "balance": 100000
+    "balance": 1000000
   }
 ]

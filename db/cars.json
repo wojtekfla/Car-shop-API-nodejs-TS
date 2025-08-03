@@ -28,5 +28,11 @@
     "model": "Kia Sportage",
     "price": 85000,
     "ownerId": null
+  },
+  {
+    "id": "1754238269951",
+    "model": "Ford Focus",
+    "price": 37500,
+    "ownerId": null
   }
 ]

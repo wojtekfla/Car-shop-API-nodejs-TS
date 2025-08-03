@@ -128,13 +128,14 @@ async function loadCars() {
 		if (res.status === 200) {
 			const cars = await res.json();
 			const divEl = document.getElementById("cars-list")
+			console.log('currentUser front', currentUser)
 
 			if (cars.length === 0) {
 				return divEl.innerHTML = "Brak samochodów.";
 			}
 
 			let html = `
-				<table class='car-table' border='1' cellspacing='0' cellpadding='5'>
+				<table class='car-table' border='1' cellspacing='2' cellpadding='5'>
 					<thead>
 						<tr>
 							<th>Id</th>
@@ -153,19 +154,26 @@ async function loadCars() {
 					<td>${car.id}</td>
 					<td>${car.model}</td>
 					<td>${car.price}</td>
-					<td>${car.owner || '-'}</td>
+					<td>${car.ownerId || '-'}</td>
+				`;
+
+				if (currentUser.role === 'admin') {
+					html += `
 					<td>
 						<button class='edit-btn' data-id='${car.id}'>Edit</button>
 						<button class='delete-btn' data-id='${car.id}'>Usuń</button>
 					</td>
-				</tr>
-				`;
+					`;
+				}
+
+				html += `</td></tr>`;
 			})
 
 			html += `</tbody></table>`;
 			divEl.innerHTML = html
 
-			document.querySelectorAll('.edit-btn').forEach((btn)=> {
+			if (currentUser.role === 'admin') {
+				document.querySelectorAll('.edit-btn').forEach((btn)=> {
 				btn.addEventListener('click', () => {
 					editCar(btn.dataset.id, cars)
 				})
@@ -175,6 +183,7 @@ async function loadCars() {
 					await deleteCar(btn.dataset.id, cars)
 				})
 			})
+			}
 		}
 	} catch (err) {
 		showMessage("Błąd przy pobieraniu samochodów", "error");
@@ -222,7 +231,7 @@ async function editCar(carId, cars) {
  * Funkcja usuwania samochodu.
  */
 async function deleteCar(carId, cars) {
-	if (!confirm('Are you sure car?')) {
+	if (!confirm('Are you sure?')) {
 		return
 	}
 
@@ -391,7 +400,7 @@ function setupEventListeners() {
 			const data = await res.json();
 			if (res.status === 200) {
 				showMessage("Samochód zakupiony", "success");
-				loadCars();
+				await loadCars();
 				await checkAuth(); // aktualizacja salda
 			} else {
 				showMessage(data.error || "Błąd zakupu samochodu", "error");
