@@ -8,21 +8,12 @@ const EXPIRES_IN = process.env.TOKEN_EXPIRATION || "10m";
 const USERS_DB = path.join(process.cwd(), "db", "users.json");
 // export function generateToken(userId: string): string {
 // } 
-export function generateToken(userId) {
-    return jwt.sign({
-        id: userId
-    }, SECRET, { expiresIn: "15m" });
-}
-export function generateToken2(payload, expiresIn) {
-    const options = { expiresIn };
-    return jwt.sign(payload, SECRET, options);
-}
-export function generateToken3(user) {
+export function generateToken(user) {
     return jwt.sign({
         id: user.id,
         username: user.username,
         role: user.role
-    }, SECRET, { expiresIn: "1h" });
+    }, SECRET, { expiresIn: "15m" });
 }
 export async function getUserFromToken(token, filePath) {
     try {

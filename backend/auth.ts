@@ -19,33 +19,17 @@ interface TokenPayload {
 
 // export function generateToken(userId: string): string {
 // } 
-export function generateToken(userId: string): string {
+export function generateToken(user: User): string {
   return jwt.sign(
     {
-      id: userId
+      id: user.id,
+			username: user.username,
+			role: user.role
     },
     SECRET,
     { expiresIn: "15m" }
   );
 }
-
-export function generateToken2(payload: object, expiresIn: number): string {
-	const options: SignOptions = { expiresIn };
-	return jwt.sign(payload, SECRET, options);
-}
-
-export function generateToken3(user: User): string {
-  return jwt.sign(
-    {
-      id: user.id,
-      username: user.username,
-      role: user.role
-    },
-    SECRET,
-    { expiresIn: "1h" }
-  );
-}
-
 
 export async function getUserFromToken(token: string, filePath: string): Promise<User | null> {
 	try {

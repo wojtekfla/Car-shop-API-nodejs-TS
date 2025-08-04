@@ -16,6 +16,7 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse) {
 	// Users routes
 	if (
 		pathname === '/users' ||
+		pathname === '/me' ||
 		pathname === '/users/delete' ||
 		pathname.match(/^\/users\/[\w-]+$/)
 	) {

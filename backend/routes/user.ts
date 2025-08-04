@@ -7,7 +7,12 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { generateToken, getUserFromToken, parseCookies } from "../auth.js";
+import {
+	generateToken,
+	getCurrentUser,
+	getUserFromToken,
+	parseCookies,
+} from "../auth.js";
 import {
 	getBodyData,
 	getUserById,
@@ -77,7 +82,7 @@ export async function handleUserRoutes(
 			const { id, role } = user;
 			const payload = { id, username, role };
 			// const token = generateToken(payload, 600); // 10 min
-			const token = generateToken(user.id)
+			const token = generateToken(user);
 
 			res.setHeader(
 				"Set-Cookie",
@@ -109,7 +114,7 @@ export async function handleUserRoutes(
 			const users = JSON.parse(userRaw);
 
 			if (users.find((u: any) => u.username === username)) {
-				res.statusCode = 409;
+				res.statusCode = 403; // 403 Forbidden
 				res.setHeader("Content-Type", "application/json");
 				res.end(
 					JSON.stringify({ success: false, message: "this name is taken" })
@@ -128,15 +133,29 @@ export async function handleUserRoutes(
 
 			users.push(newUser);
 			await fs.writeFile(USERS_DB, JSON.stringify(users, null, 2));
-			res.statusCode = 201;
+			res.statusCode = 201; // 201 Created
 			res.setHeader("Content-Type", "application/json");
 			res.end(JSON.stringify({ success: true, username: newUser.username }));
 		} catch (error) {
-			res.statusCode = 400;
+			res.statusCode = 400; // 400 Bad request
 			res.setHeader("Content-Type", "application/json");
 			res.end(JSON.stringify({ success: false, message: "Bad request" }));
 		}
 		return;
+	}
+
+	if (method === "GET" && pathname === "/me") {
+		const user = await getCurrentUser(req);
+		if (!user) {
+			res.statusCode = 401;
+			res.setHeader("Content-Type", "application/json");
+			res.end(JSON.stringify({ error: "Not authenticated" }));
+			return;
+		}
+
+		res.statusCode = 200;
+		res.setHeader("Content-Type", "application/json");
+		return res.end(JSON.stringify(user));
 	}
 
 	if (method === "POST" && pathname === "/logout") {
@@ -215,21 +234,25 @@ export async function handleUserRoutes(
 			return res.end(JSON.stringify({ error: "No token" }));
 		}
 
-		const currentUser = await getUserFromToken(token, USERS_DB)
+		const currentUser = await getUserFromToken(token, USERS_DB);
 		if (!currentUser) {
 			res.statusCode = 401; // 401 Unauthorized
-			return res.end(JSON.stringify({success: false, message: "Wrong token"}))
+			return res.end(
+				JSON.stringify({ success: false, message: "Wrong token" })
+			);
 		}
 
 		const users = await readDataFromJson<User>(USERS_DB);
-		const filteredUsers = users.filter((u) => u.id !== currentUser.id)
-		await saveDataToJson(USERS_DB, filteredUsers)
+		const filteredUsers = users.filter((u) => u.id !== currentUser.id);
+		await saveDataToJson(USERS_DB, filteredUsers);
 
-		res.setHeader('Set-Cookie', 'token=; HttpOnly; Max-Age=0; Path=/')
+		res.setHeader("Set-Cookie", "token=; HttpOnly; Max-Age=0; Path=/");
 
 		res.statusCode = 200; // 200 OK
-		res.setHeader('Content-Type', 'application.json')
-		return res.end(JSON.stringify({ success: true, message: 'Profile has been deleted'}))
+		res.setHeader("Content-Type", "application.json");
+		return res.end(
+			JSON.stringify({ success: true, message: "Profile has been deleted" })
+		);
 	}
 
 	// GET users - tylko dla admina
@@ -251,6 +274,7 @@ export async function handleUserRoutes(
 				if (typeof decoded === "string")
 					throw new Error("Invalid token payload");
 				payload = decoded as TokenPayload;
+				console.log("Payload decoded in /users:", payload);
 			} catch (error) {
 				res.statusCode = 403;
 				res.end(JSON.stringify({ success: false, message: "Invalid token" }));
@@ -261,6 +285,7 @@ export async function handleUserRoutes(
 			const users = JSON.parse(usersRaw);
 
 			if (payload.role === "admin") {
+				res.statusCode = 200;
 				res.setHeader("Content-Type", "application/json");
 				res.end(JSON.stringify(users));
 			} else {
@@ -273,11 +298,9 @@ export async function handleUserRoutes(
 					);
 					return;
 				}
-
+				res.statusCode = 200;
 				res.setHeader("Content-Type", "application/json");
-				res.write(JSON.stringify(currentUser));
-				res.end();
-				return;
+				return res.end(JSON.stringify(currentUser));
 			}
 		} catch (error) {
 			console.log("Error in /users:", error);
@@ -285,23 +308,9 @@ export async function handleUserRoutes(
 			res.end(JSON.stringify({ success: false, message: "Server error" }));
 			return;
 		}
-
 		return;
 	}
 
 	res.statusCode = 404;
 	res.end("Not found");
 }
-
-// function parseCookies(req: IncomingMessage): Record<string, string> {
-// 	const rawCookies = req.headers.cookie || "";
-// 	const parsed: Record<string, string> = {};
-// 	rawCookies.split(";").forEach((cookie) => {
-// 		const [name, ...rest] = cookie.trim().split("=");
-// 		if (!name) return;
-// 		const value = rest.join("=");
-// 		parsed[name] = decodeURIComponent(value);
-// 		console.log("parsed cookies", parsed);
-// 	});
-// 	return parsed;
-// }

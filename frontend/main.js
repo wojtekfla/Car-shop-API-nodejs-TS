@@ -61,7 +61,10 @@ function renderNav() {
  */
 async function checkAuth() {
 	try {
-		const res = await fetch("http://localhost:3000/users");
+		const res = await fetch("http://localhost:3000/users", {
+			method: "GET",
+			credentials: "include",
+		});
 		if (res.status === 200) {
 			const data = await res.json();
 			if (Array.isArray(data)) {
@@ -99,20 +102,51 @@ function showView(viewId) {
  */
 async function loadProfile() {
 	try {
-		const res = await fetch("http://localhost:3000/users");
-		if (res.status === 200) {
-			const data = await res.json();
-			let profile;
-			if (Array.isArray(data)) {
-				profile = data.find((u) => u.role === "admin") || null;
-			} else {
-				profile = data;
-			}
-			if (profile) {
-				document.getElementById(
-					"profile-info"
-				).innerText = `Username: ${profile.username}\nSaldo: ${profile.balance}`;
-			}
+		const res = await fetch("http://localhost:3000/me");
+		if (!res.ok) {
+			throw new Error("Unauthorized");
+		}
+
+		const user = await res.json();
+		currentUser = user;
+
+		// profil uzytkownika
+		const profileDiv = document.getElementById("profile-info");
+		profileDiv.innerHTML = `
+			<p><strong>username:</strong> ${user.username}</p>
+			<p><strong>balance:</strong> ${user.balance}</p>
+			<button id="edit-profile-btn">Edytuj profil</button>
+		`;
+
+		// sekcja admina
+		if (user.role === "admin") {
+			console.log("Admin - pobieram listę użytkowników");
+			const usersRes = await fetch("http://localhost:3000/users", {
+				credentials: 'include',
+			});
+			console.log("Response status (users):", usersRes.status);
+			const users = await usersRes.json();
+			console.log("users database", users);
+
+
+			const userListDiv = document.getElementById("user-list");
+			console.log('userListDiv', userListDiv)
+			userListDiv.innerHTML = `
+				<h3>All users</h3>
+				<ul>
+					${users
+						.map(
+							(u) => `
+						<li>
+							${u.username} | ${u.role} | ${u.balance}
+							<button class="edit-user-btn" data-id="${u.id}">Edytuj</button>
+							<button class="delete-user-btn" data-id="${u.id}">Usuń</button>
+						</li>
+					`
+						)
+						.join("")}
+				</ul>
+			`;
 		}
 	} catch (err) {
 		showMessage("Błąd przy pobieraniu profilu", "error");
@@ -127,11 +161,11 @@ async function loadCars() {
 		const res = await fetch("http://localhost:3000/cars");
 		if (res.status === 200) {
 			const cars = await res.json();
-			const divEl = document.getElementById("cars-list")
-			console.log('currentUser front', currentUser)
+			const divEl = document.getElementById("cars-list");
+			console.log("currentUser front", currentUser);
 
 			if (cars.length === 0) {
-				return divEl.innerHTML = "Brak samochodów.";
+				return (divEl.innerHTML = "Brak samochodów.");
 			}
 
 			let html = `
@@ -148,16 +182,16 @@ async function loadCars() {
 					<tbody>
 			`;
 
-			cars.forEach((car)=> {
+			cars.forEach((car) => {
 				html += `
 				<tr class='car-row'>
 					<td>${car.id}</td>
 					<td>${car.model}</td>
 					<td>${car.price}</td>
-					<td>${car.ownerId || '-'}</td>
+					<td>${car.ownerId || "-"}</td>
 				`;
 
-				if (currentUser.role === 'admin') {
+				if (currentUser.role === "admin") {
 					html += `
 					<td>
 						<button class='edit-btn' data-id='${car.id}'>Edit</button>
@@ -167,22 +201,22 @@ async function loadCars() {
 				}
 
 				html += `</td></tr>`;
-			})
+			});
 
 			html += `</tbody></table>`;
-			divEl.innerHTML = html
+			divEl.innerHTML = html;
 
-			if (currentUser.role === 'admin') {
-				document.querySelectorAll('.edit-btn').forEach((btn)=> {
-				btn.addEventListener('click', () => {
-					editCar(btn.dataset.id, cars)
-				})
-			})
-			document.querySelectorAll('.delete-btn').forEach((btn)=> {
-				btn.addEventListener('click', async () => {
-					await deleteCar(btn.dataset.id, cars)
-				})
-			})
+			if (currentUser.role === "admin") {
+				document.querySelectorAll(".edit-btn").forEach((btn) => {
+					btn.addEventListener("click", () => {
+						editCar(btn.dataset.id, cars);
+					});
+				});
+				document.querySelectorAll(".delete-btn").forEach((btn) => {
+					btn.addEventListener("click", async () => {
+						await deleteCar(btn.dataset.id, cars);
+					});
+				});
 			}
 		}
 	} catch (err) {
@@ -195,35 +229,34 @@ async function loadCars() {
  */
 async function editCar(carId, cars) {
 	try {
-
-		const car = cars.find((c) => c.id === carId)
+		const car = cars.find((c) => c.id === carId);
 		if (!car) {
 			return showMessage("Car not found", "error");
 		}
 
-		const modelUpdated = prompt('Enter new model');
-    const priceUpdated = Number(prompt('Enter new price'));
-    if (!modelUpdated || isNaN(priceUpdated)) {
-			return showMessage('Wrong data', 'error')
+		const modelUpdated = prompt("Enter new model");
+		const priceUpdated = Number(prompt("Enter new price"));
+		if (!modelUpdated || isNaN(priceUpdated)) {
+			return showMessage("Wrong data", "error");
 		}
 
 		const res = await fetch(`http://localhost:3000/cars/${carId}`, {
-			method: 'PUT',
+			method: "PUT",
 			headers: {
-				'Content-Type': "application/json",
+				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ model: modelUpdated, price: priceUpdated })
-		})
-		const data = await res.json()
+			body: JSON.stringify({ model: modelUpdated, price: priceUpdated }),
+		});
+		const data = await res.json();
 
 		if (res.status === 200) {
-			showMessage(`Car updated`, 'success')
-			loadCars()
+			showMessage(`Car updated`, "success");
+			loadCars();
 		} else {
-			showMessage (data.error || 'Error during edditing', 'error')
-		}		
+			showMessage(data.error || "Error during edditing", "error");
+		}
 	} catch (error) {
-		showMessage ('Connection error when editing', 'error')
+		showMessage("Connection error when editing", "error");
 	}
 }
 
@@ -231,29 +264,29 @@ async function editCar(carId, cars) {
  * Funkcja usuwania samochodu.
  */
 async function deleteCar(carId, cars) {
-	if (!confirm('Are you sure?')) {
-		return
+	if (!confirm("Are you sure?")) {
+		return;
 	}
 
 	try {
-		const car = cars.find((c) => c.id === carId)
+		const car = cars.find((c) => c.id === carId);
 		if (!car) {
 			return showMessage("Car not found", "error");
 		}
 
 		const res = await fetch(`http://localhost:3000/cars/${carId}/delete`, {
-			method: 'DELETE',
-		})
-		const data = await res.json()
+			method: "DELETE",
+		});
+		const data = await res.json();
 
 		if (res.status === 200) {
-			showMessage(`Car deleted!`, 'success')
-			loadCars()
+			showMessage(`Car deleted!`, "success");
+			loadCars();
 		} else {
-			showMessage (data.error || 'Error during deleting', 'error')
-		}		
+			showMessage(data.error || "Error during deleting", "error");
+		}
 	} catch (error) {
-		showMessage ('Connection error when deleting', 'error')
+		showMessage("Connection error when deleting", "error");
 	}
 }
 
@@ -314,28 +347,31 @@ function setupEventListeners() {
 	}
 
 	// Formularz aktualizacji profilu
-	const profileForm = document.getElementById("profileForm");
-	if (profileForm) {
-		profileForm.addEventListener("submit", async (e) => {
-			e.preventDefault();
-			const newUsername = document.getElementById("newUsername").value;
-			const newPassword = document.getElementById("newPassword").value;
-			const userId = currentUser.id;
-			const res = await fetch(`http://localhost:3000/users/${userId}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username: newUsername, password: newPassword }),
-			});
-			const data = await res.json();
-			if (res.status === 200) {
-				showMessage("Profil zaktualizowany", "success");
-				await checkAuth();
-				loadProfile();
-			} else {
-				showMessage(data.error || "Błąd aktualizacji profilu", "error");
-			}
-		});
-	}
+	// renderProfileView();
+
+	// Formularz aktualizacji profilu - old version !
+	// const profileForm2 = document.getElementById("profileForm");
+	// if (profileForm) {
+	// 	profileForm.addEventListener("submit", async (e) => {
+	// 		e.preventDefault();
+	// 		const newUsername = document.getElementById("newUsername").value;
+	// 		const newPassword = document.getElementById("newPassword").value;
+	// 		const userId = currentUser.id;
+	// 		const res = await fetch(`http://localhost:3000/users/${userId}`, {
+	// 			method: "PUT",
+	// 			headers: { "Content-Type": "application/json" },
+	// 			body: JSON.stringify({ username: newUsername, password: newPassword }),
+	// 		});
+	// 		const data = await res.json();
+	// 		if (res.status === 200) {
+	// 			showMessage("Profil zaktualizowany", "success");
+	// 			await checkAuth();
+	// 			loadProfile();
+	// 		} else {
+	// 			showMessage(data.error || "Błąd aktualizacji profilu", "error");
+	// 		}
+	// 	});
+	// }
 
 	// Formularz usunięcia profilu
 	const profileDelete = document.getElementById("profile-delete");
@@ -353,15 +389,15 @@ function setupEventListeners() {
 				const data = await res.json();
 				if (data.succes) {
 					showMessage("Profile deleted", "success");
-          checkAuth();
-          renderView('home')
+					checkAuth();
+					renderView("home");
 				} else {
 					showMessage(data.message || "Error while deleting account");
 				}
 			} catch (error) {
-        console.error("Error while deleting", error)
-        showMessage('A network or server error occurred')
-      }
+				console.error("Error while deleting", error);
+				showMessage("A network or server error occurred");
+			}
 		});
 	}
 
@@ -376,7 +412,7 @@ function setupEventListeners() {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ model, price }),
-				credentials: 'include'
+				credentials: "include",
 			});
 			const data = await res.json();
 			if (res.status === 201) {
@@ -407,6 +443,46 @@ function setupEventListeners() {
 			}
 		});
 	}
+}
+
+async function renderProfileView() {
+	const response = await fetch("/auth", {
+		method: "GET",
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		showMessage("You have to login first");
+		showView("login");
+		return;
+	}
+
+	const user = await response.json();
+	const profileSection = document.getElementById("profile-view");
+	profileSection.innerHTML = `
+		<h2>Profil<h2>
+		<p><strong>Id:</strong> ${user.id}</p>
+		<p><strong>username:</strong> ${user.username}</p>
+		<p><strong>role:</strong> ${user.role}</p>
+		<p><strong>balance:</strong> ${user.balance}</p>
+		<button id="logout-btn"></button>
+
+	`;
+
+	const logoutButton = document.getElementById("logout-btn");
+	if (logoutButton) {
+		logoutButton.addEventListener("click", async () => {
+			await fetch("/logout", {
+				method: "POST",
+				credentials: "include",
+			});
+			showMessage("You have been logged out");
+			checkAuth();
+			showView("login");
+		});
+	}
+
+	showView("profile");
 }
 
 /**
@@ -451,5 +527,5 @@ function setupSSE() {
 window.addEventListener("load", async () => {
 	await checkAuth();
 	setupEventListeners();
-	setupSSE();
+	// setupSSE();
 });
