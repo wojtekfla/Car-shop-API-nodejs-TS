@@ -37,7 +37,6 @@ export async function getUserFromToken(token: string, filePath: string): Promise
 			token,
 			process.env.SECRET_TOKEN!
 		) as TokenPayload;
-		console.log('decoded payload', decoded)
 		const users = await readDataFromJson<User>(filePath);
 		return users.find((u) => u.id === decoded.id) || null;
 	} catch (error) {
@@ -60,7 +59,6 @@ export function parseCookies(req: IncomingMessage): Record<string, string> {
 		if (!name) return;
 		const value = rest.join("=");
 		parsed[name] = decodeURIComponent(value);
-		console.log("parsed cookies", parsed);
 	});
 	return parsed;
 }

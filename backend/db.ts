@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { Car, User } from "./types.js";
 import { getCurrentUser } from "./auth.js";
+import { sendSSE } from "./sse.js";
 
 const USERS_DB = path.join(process.cwd(), "db", "users.json");
 const CARS_DB = path.join(process.cwd(), "db", "cars.json");
@@ -136,7 +137,18 @@ export async function buyCar(
 	await saveDataToJson<Car>(CARS_DB, cars)
 	await saveDataToJson<User>(USERS_DB, users)
 
+	sendSSE({
+  event: "carPurchased",
+  carId: boughtCar.id,
+  buyerId: buyer.id,
+  model: boughtCar.model,
+  price: boughtCar.price,
+  buyerUsername: buyer.username,
+	});
+
 	res.statusCode = 200;
 	res.setHeader ("Content-Type", "application/json")
 	return res.end(JSON.stringify({ success: "Car purchased successfully" }));
 }
+
+

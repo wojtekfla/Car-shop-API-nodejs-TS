@@ -25,7 +25,6 @@ export async function handleCarsRoutes(
 ) {
 	const method = req.method;
 	const pathname = req.url?.split("?")[0];
-	console.log("pathname", pathname);
 
 	if (method === "GET" && pathname === "/cars") {
 		const cars = await loadCars(CARS_DB);
@@ -42,7 +41,6 @@ export async function handleCarsRoutes(
 
 	if (method === "POST" && pathname === "/cars") {
 		const currentUser = await getCurrentUser(req);
-    console.log('currentUser ->', currentUser)
 
 		if (!currentUser) {
 			res.statusCode = 401; // 401 Unauthorized
@@ -54,7 +52,6 @@ export async function handleCarsRoutes(
 		}
 
 		const body = JSON.parse(await getBodyData(req));
-    console.log('recived body->', body)
 		const { model, price } = body;
 
 		if (!model || typeof model !== "string" || isNaN(price)) {
@@ -78,7 +75,6 @@ export async function handleCarsRoutes(
 
 	if (method === 'PUT' && pathname?.match(/^\/cars\/[^\/]+$/)) {
 		const pathnameParts = pathname.split('/')
-		console.log('pathname parts', pathnameParts)
 		const carId = pathnameParts[2]
 
 		const currentUser = await getCurrentUser(req)
@@ -106,7 +102,6 @@ export async function handleCarsRoutes(
 
 		cars[index].model = model;
 		cars[index].price = price;
-		// cars[index].ownerId = ownerId; - do rozbudowy
 
 		await saveDataToJson(CARS_DB, cars);
     res.statusCode = 200 // OK
@@ -135,6 +130,5 @@ export async function handleCarsRoutes(
 	if (method === 'POST' && pathname?.match(/^\/cars\/[\w-]+\/buy$/)) {
 		await buyCar(req, res, pathname)
 	}
+
 }
-
-

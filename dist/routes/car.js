@@ -9,7 +9,6 @@ const CARS_DB = path.join(__dirname, "../../db", "cars.json");
 export async function handleCarsRoutes(req, res) {
     const method = req.method;
     const pathname = req.url?.split("?")[0];
-    console.log("pathname", pathname);
     if (method === "GET" && pathname === "/cars") {
         const cars = await loadCars(CARS_DB);
         if (cars) {
@@ -24,7 +23,6 @@ export async function handleCarsRoutes(req, res) {
     }
     if (method === "POST" && pathname === "/cars") {
         const currentUser = await getCurrentUser(req);
-        console.log('currentUser ->', currentUser);
         if (!currentUser) {
             res.statusCode = 401; // 401 Unauthorized
             return res.end(JSON.stringify({ error: "Have to be logged" }));
@@ -34,7 +32,6 @@ export async function handleCarsRoutes(req, res) {
             return res.end(JSON.stringify({ error: "Forbidden action" }));
         }
         const body = JSON.parse(await getBodyData(req));
-        console.log('recived body->', body);
         const { model, price } = body;
         if (!model || typeof model !== "string" || isNaN(price)) {
             res.statusCode = 400; // 400 Bad request
@@ -54,7 +51,6 @@ export async function handleCarsRoutes(req, res) {
     }
     if (method === 'PUT' && pathname?.match(/^\/cars\/[^\/]+$/)) {
         const pathnameParts = pathname.split('/');
-        console.log('pathname parts', pathnameParts);
         const carId = pathnameParts[2];
         const currentUser = await getCurrentUser(req);
         if (!currentUser || currentUser.role !== "admin") {
@@ -76,7 +72,6 @@ export async function handleCarsRoutes(req, res) {
         }
         cars[index].model = model;
         cars[index].price = price;
-        // cars[index].ownerId = ownerId; - do rozbudowy
         await saveDataToJson(CARS_DB, cars);
         res.statusCode = 200; // OK
         return res.end(JSON.stringify(cars[index]));
@@ -97,7 +92,6 @@ export async function handleCarsRoutes(req, res) {
         return res.end(JSON.stringify({ success: true, deleted: deletedCar }));
     }
     if (method === 'POST' && pathname?.match(/^\/cars\/[\w-]+\/buy$/)) {
-        console.log(">>> RUTER: BUY REQUEST TRIGGERED", pathname);
         await buyCar(req, res, pathname);
     }
 }

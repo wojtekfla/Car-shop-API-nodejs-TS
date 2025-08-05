@@ -18,7 +18,6 @@ export function generateToken(user) {
 export async function getUserFromToken(token, filePath) {
     try {
         const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-        console.log('decoded payload', decoded);
         const users = await readDataFromJson(filePath);
         return users.find((u) => u.id === decoded.id) || null;
     }
@@ -42,7 +41,6 @@ export function parseCookies(req) {
             return;
         const value = rest.join("=");
         parsed[name] = decodeURIComponent(value);
-        console.log("parsed cookies", parsed);
     });
     return parsed;
 }

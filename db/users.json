@@ -11,20 +11,20 @@
     "username": "wojtek",
     "password": "$2b$10$UsTZRkk3Rbc3afMloE6IdOyg4aLQG8.hlt1rgPZQivyru/5BeyXhm",
     "role": "user",
-    "balance": 100000
+    "balance": 150000
   },
   {
     "id": "1754395191746",
     "username": "rychu",
     "password": "$2b$10$BFwpUQ4YC1lZAdsMwTseZO.HtDZ32DIoYOxWsbwOHVSYVweZ4ZToi",
     "role": "user",
-    "balance": 100000
+    "balance": 85000
   },
   {
     "id": "1754395212541",
-    "username": "zbychu2",
-    "password": "$2b$10$zaJQawf6cRyfhGyC.M76iOQeJIn2KDSmHhj9Xf5IHV.0iLOFaw1BW",
+    "username": "zbychu",
+    "password": "$2b$10$aMd6S5WOyyTBexYzsAUArOJX5X3cPaRvlZwZqWZjkwBMA4MIxpn5u",
     "role": "user",
-    "balance": 100000
+    "balance": 150000
   }
 ]
