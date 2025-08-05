@@ -1,92 +1,38 @@
 [
   {
-    "id": "car-1",
-    "make": "Toyota",
-    "model": "Corolla",
-    "year": 2021,
+    "id": "1721708487939",
+    "model": "Toyota Corrola",
     "price": 65000,
-    "isSold": false,
-    "ownerId": null
+    "ownerId": "1754395191746"
   },
   {
-    "id": "car-2",
-    "make": "Honda",
-    "model": "Civic",
-    "year": 2020,
+    "id": "1721857889365",
+    "model": "Honda Civic",
     "price": 61000,
-    "isSold": false,
     "ownerId": null
   },
   {
-    "id": "car-3",
-    "make": "Mazda",
-    "model": "6",
-    "year": 2019,
+    "id": "1721917542677",
+    "model": "Mazda 6",
     "price": 58000,
-    "isSold": true,
-    "ownerId": "user-123"
+    "ownerId": null
   },
   {
-    "id": "car-4",
-    "make": "Volkswagen",
-    "model": "Passat",
-    "year": 2022,
+    "id": "1721979674821",
+    "model": "Volkswagen Passat",
     "price": 72000,
-    "isSold": false,
     "ownerId": null
   },
   {
-    "id": "car-5",
-    "make": "Kia",
-    "model": "Sportage",
-    "year": 2021,
+    "id": "1722076537523",
+    "model": "Kia Sportage",
     "price": 85000,
-    "isSold": true,
-    "ownerId": "user-456"
-  },
-  {
-    "id": "car-6",
-    "make": "Ford",
-    "model": "Focus",
-    "year": 2020,
-    "price": 54000,
-    "isSold": false,
     "ownerId": null
   },
   {
-    "id": "car-7",
-    "make": "Skoda",
-    "model": "Octavia",
-    "year": 2022,
-    "price": 79000,
-    "isSold": false,
-    "ownerId": null
-  },
-  {
-    "id": "car-8",
-    "make": "Hyundai",
-    "model": "Tucson",
-    "year": 2023,
-    "price": 99000,
-    "isSold": true,
-    "ownerId": "user-789"
-  },
-  {
-    "id": "car-9",
-    "make": "Renault",
-    "model": "Megane",
-    "year": 2021,
-    "price": 67000,
-    "isSold": false,
-    "ownerId": null
-  },
-  {
-    "id": "car-10",
-    "make": "Peugeot",
-    "model": "3008",
-    "year": 2022,
-    "price": 88000,
-    "isSold": false,
+    "id": "1754238269951",
+    "model": "Ford Focus",
+    "price": 37500,
     "ownerId": null
   }
 ]

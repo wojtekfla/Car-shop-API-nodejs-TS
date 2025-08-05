@@ -17,7 +17,6 @@ export async function handleStaticFiles(req, res) {
     const method = req.method || "GET";
     const rawUrl = req.url || "/";
     const pathname = rawUrl.split("?")[0];
-    console.log("url", pathname, "| method: ", method);
     let filePath;
     if (method === "GET") {
         if (pathname === "/") {

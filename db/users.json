@@ -1,16 +1,30 @@
 [
   {
-    "id": "admin01",
+    "id": "1754207643031",
     "username": "admin",
-    "password": "$2b$10$yRbe4cFbi3gy/Y2GXmJQUO8dJ8gKy6qSYErWFbkLfe8UPHcN/Bk0G",
+    "password": "$2b$10$HUXt.uWXuyUdQC14/rAbXOF8hPyxYYI6Oec3QzAtgsMzwbLmC/iV6",
     "role": "admin",
+    "balance": 500000
+  },
+  {
+    "id": "1754395181679",
+    "username": "wojtek",
+    "password": "$2b$10$UsTZRkk3Rbc3afMloE6IdOyg4aLQG8.hlt1rgPZQivyru/5BeyXhm",
+    "role": "user",
     "balance": 150000
   },
   {
-    "id": "22d6eb36-34a0-49b2-a319-a5c18a8631aa",
-    "username": "wojtek",
-    "password": "$2b$10$cerLR6Oeloogfj/cFLgKsu9JZNl8WJIX2CbuT1vwWDneKXwto0fcm",
+    "id": "1754395191746",
+    "username": "rychu",
+    "password": "$2b$10$BFwpUQ4YC1lZAdsMwTseZO.HtDZ32DIoYOxWsbwOHVSYVweZ4ZToi",
     "role": "user",
-    "balance": 100000
+    "balance": 85000
+  },
+  {
+    "id": "1754395212541",
+    "username": "zbychu",
+    "password": "$2b$10$aMd6S5WOyyTBexYzsAUArOJX5X3cPaRvlZwZqWZjkwBMA4MIxpn5u",
+    "role": "user",
+    "balance": 150000
   }
 ]

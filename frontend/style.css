@@ -1,83 +1,229 @@
 /* Podstawowe style */
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #f7f7f7;
-  }
-  
-  header {
-    background: #333;
-    color: #fff;
-    padding: 10px;
-  }
-  
-  header h1 {
-    margin: 0;
-  }
-  
-  nav ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  nav li {
-    display: inline;
-    margin-right: 15px;
-  }
-  
-  nav a {
-    color: #fff;
-    text-decoration: none;
-  }
-  
-  #user-info {
-    margin-top: 5px;
-    font-size: 0.9em;
-  }
-  
-  /* Widoki */
-  .view {
-    background: #fff;
-    padding: 20px;
-    margin-top: 20px;
-    border-radius: 4px;
-  }
-  
-  /* Style formularzy i przycisków */
-  input, button {
-    padding: 8px;
-    margin: 5px;
-  }
-  
-  /* Komunikaty */
-  #message {
-    padding: 10px;
-    margin: 10px 0;
-  }
-  
-  #message.success {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  #message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  /* Powiadomienia */
-  #notification {
-    padding: 10px;
-    margin: 10px 0;
-    background-color: #cce5ff;
-    color: #004085;
-    border: 1px solid #b8daff;
-    border-radius: 4px;
-  }
-  
-  /* Dodatkowy styl dla elementów listy samochodów */
-  .car-item {
-    border-bottom: 1px solid #ccc;
-    padding: 5px 0;
-  }
-  
+	font-family: Arial, sans-serif;
+	margin: 20px;
+	background: #f7f7f7;
+}
+
+header {
+	background: #333;
+	color: #fff;
+	padding: 10px;
+}
+
+header h1 {
+	margin: 0;
+}
+
+nav ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+nav li {
+	display: inline;
+	margin-right: 15px;
+}
+
+nav a {
+	color: #fff;
+	text-decoration: none;
+}
+
+#user-info {
+	margin-top: 5px;
+	font-size: 0.9em;
+}
+
+/* Widoki */
+.view {
+	background: #fff;
+	padding: 20px;
+	margin-top: 20px auto;
+	border-radius: 4px;
+}
+
+/* Style formularzy i przycisków */
+input,
+button {
+	padding: 8px;
+	margin: 5px;
+}
+
+/* Komunikaty */
+#message {
+	padding: 10px;
+	margin: 10px 0;
+}
+
+#message.success {
+	background-color: #d4edda;
+	color: #155724;
+}
+
+#message.error {
+	background-color: #f8d7da;
+	color: #721c24;
+}
+
+/* Powiadomienia */
+#notification {
+	padding: 10px;
+	margin: 10px 0;
+	background-color: #cce5ff;
+	color: #004085;
+	border: 1px solid #b8daff;
+	border-radius: 4px;
+}
+
+/* Dodatkowy styl dla elementów listy samochodów */
+.car-item {
+	border-bottom: 1px solid #ccc;
+	padding: 5px 0;
+}
+
+/* Dodane style */
+
+body {
+  max-width: 900px;
+  margin: 30px auto;
+  line-height: 1.6;
+  background-color: #f0f0f0;
+  color: #222;
+}
+
+
+.view {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-top: 25px auto;
+  border-radius: 6px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Header jako flex */
+header {
+  background-color: #444;
+  color: #fff;
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 4px;
+}
+
+header h1 {
+  margin: 0;
+  color: #f0f0f0;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 0;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+#user-info {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+input {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 200px;
+}
+
+button {
+  padding: 6px 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  font-size: 0.95em;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.admin-user-list ul,
+#cars-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-user-list li,
+.car-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border: 1px solid #ddd;
+  background-color: #fafafa;
+  border-radius: 4px;
+}
+
+.admin-user-list button {
+  margin-left: 6px;
+}
+
+#message,
+#notification {
+  padding: 10px;
+  margin: 15px 0;
+  font-weight: bold;
+  border-radius: 5px;
+  text-align: center;
+}
+
+#message.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+#message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+#notification {
+  background-color: #e2e3ff;
+  color: #333;
+  border: 1px solid #c8d6ff;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+h2, h3 {
+  color: #333;
+  text-align: center;
+}
