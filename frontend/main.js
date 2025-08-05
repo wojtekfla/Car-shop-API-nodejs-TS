@@ -61,7 +61,7 @@ function renderNav() {
  */
 async function checkAuth() {
 	try {
-		const res = await fetch("http://localhost:3000/users", {
+		const res = await fetch("http://localhost:3000/me", {
 			method: "GET",
 			credentials: "include",
 		});
@@ -106,7 +106,6 @@ async function loadProfile() {
 		if (!res.ok) {
 			throw new Error("Unauthorized");
 		}
-
 		const user = await res.json();
 		currentUser = user;
 
@@ -115,22 +114,26 @@ async function loadProfile() {
 		profileDiv.innerHTML = `
 			<p><strong>username:</strong> ${user.username}</p>
 			<p><strong>balance:</strong> ${user.balance}</p>
-			<button id="edit-profile-btn">Edytuj profil</button>
+			<button id="edit-profile-btn">Edit profile</button>
 		`;
+		document
+			.getElementById('edit-profile-btn')
+			.addEventListener("click", () => {
+				showEditForm(user);
+			});
 
 		// sekcja admina
 		if (user.role === "admin") {
-			console.log("Admin - pobieram listę użytkowników");
 			const usersRes = await fetch("http://localhost:3000/users", {
-				credentials: 'include',
+			credentials: "include",
 			});
-			console.log("Response status (users):", usersRes.status);
+			if (!usersRes.ok) {
+				throw new Error("Error getting user list");
+			}
+
 			const users = await usersRes.json();
-			console.log("users database", users);
-
-
+			console.log('users list', users)
 			const userListDiv = document.getElementById("user-list");
-			console.log('userListDiv', userListDiv)
 			userListDiv.innerHTML = `
 				<h3>All users</h3>
 				<ul>
@@ -139,17 +142,88 @@ async function loadProfile() {
 							(u) => `
 						<li>
 							${u.username} | ${u.role} | ${u.balance}
-							<button class="edit-user-btn" data-id="${u.id}">Edytuj</button>
-							<button class="delete-user-btn" data-id="${u.id}">Usuń</button>
+							<button class="edit-user-btn" data-id="${u.id}">Edit</button>
+							<button class="delete-user-btn" data-id="${u.id}">Delete</button>
 						</li>
 					`
 						)
 						.join("")}
 				</ul>
 			`;
+
+			document.querySelectorAll(".edit-user-btn").forEach((btn) =>
+				btn.addEventListener("click", (e) => {
+					const id = e.target.dataset.id;
+					const userToEdit = users.find((u) => u.id === id);
+					if (userToEdit) {
+						showEditForm(userToEdit);
+					}
+				})
+			);
+			document.querySelectorAll(".delete-user-btn").forEach((btn) =>
+				btn.addEventListener("click", async (e) => {
+					const id = e.target.dataset.id;
+					if (confirm("Are you sure you want to delete user?")) {
+						await deleteUser(id);
+						loadProfile();
+					}
+				})
+			);
 		}
 	} catch (err) {
 		showMessage("Błąd przy pobieraniu profilu", "error");
+	}
+}
+
+// Obsługa funkcji loadProfile()
+/**
+ * Prompt obsługi edycji user-a
+ */
+function showEditForm(user) {
+	const username = prompt('New username', user.username)
+	const password = prompt('New password', user.password)
+
+	let role = user.role
+	let balance = user.balance
+
+	if (currentUser.role === 'admin' && currentUser.id !== user.id) {
+		role = prompt('New role (admin/user)', user.role) || user.role
+		balance = Number(prompt('New balance', user.balance)) || user.balance
+	}
+
+	updateUser(user.id, { username, password, role, balance})
+}
+/**
+ * Update user-a
+ */
+async function updateUser(id, data) {
+	try {
+		const res = await fetch(`http://localhost:3000/users/${id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json'},
+			credentials: 'include',
+			body: JSON.stringify(data)
+		})
+		if (!res.ok) throw new Error ('Update error')
+		showNotification('User successfully updated')
+		loadProfile()
+	} catch (error) {
+		console.error(error)
+		showMessage('Failed to update user', 'error')
+	}
+}
+/**
+ * Delete user - admin can delete a user
+ */
+async function deleteUser(id) {
+	try {
+		const res = await fetch(`http://localhost:3000/users/${id}`, {
+			method: 'DELETE',
+			credentials: "include",
+		})
+	} catch (error) {
+	console.error(error);
+	showMessage("Failed to delete user", "error");	
 	}
 }
 
@@ -445,45 +519,46 @@ function setupEventListeners() {
 	}
 }
 
-async function renderProfileView() {
-	const response = await fetch("/auth", {
-		method: "GET",
-		credentials: "include",
-	});
+// do skasowania
+// async function renderProfileView() {
+// 	const response = await fetch("/auth", {
+// 		method: "GET",
+// 		credentials: "include",
+// 	});
 
-	if (!response.ok) {
-		showMessage("You have to login first");
-		showView("login");
-		return;
-	}
+// 	if (!response.ok) {
+// 		showMessage("You have to login first");
+// 		showView("login");
+// 		return;
+// 	}
 
-	const user = await response.json();
-	const profileSection = document.getElementById("profile-view");
-	profileSection.innerHTML = `
-		<h2>Profil<h2>
-		<p><strong>Id:</strong> ${user.id}</p>
-		<p><strong>username:</strong> ${user.username}</p>
-		<p><strong>role:</strong> ${user.role}</p>
-		<p><strong>balance:</strong> ${user.balance}</p>
-		<button id="logout-btn"></button>
+// 	const user = await response.json();
+// 	const profileSection = document.getElementById("profile-view");
+// 	profileSection.innerHTML = `
+// 		<h2>Profil<h2>
+// 		<p><strong>Id:</strong> ${user.id}</p>
+// 		<p><strong>username:</strong> ${user.username}</p>
+// 		<p><strong>role:</strong> ${user.role}</p>
+// 		<p><strong>balance:</strong> ${user.balance}</p>
+// 		<button id="logout-btn"></button>
 
-	`;
+// 	`;
 
-	const logoutButton = document.getElementById("logout-btn");
-	if (logoutButton) {
-		logoutButton.addEventListener("click", async () => {
-			await fetch("/logout", {
-				method: "POST",
-				credentials: "include",
-			});
-			showMessage("You have been logged out");
-			checkAuth();
-			showView("login");
-		});
-	}
+// 	const logoutButton = document.getElementById("logout-btn");
+// 	if (logoutButton) {
+// 		logoutButton.addEventListener("click", async () => {
+// 			await fetch("/logout", {
+// 				method: "POST",
+// 				credentials: "include",
+// 			});
+// 			showMessage("You have been logged out");
+// 			checkAuth();
+// 			showView("login");
+// 		});
+// 	}
 
-	showView("profile");
-}
+// 	showView("profile");
+// }
 
 /**
  * Prosty router – na podstawie fragmentu adresu URL (hash) wyświetla odpowiedni widok.
@@ -527,5 +602,5 @@ function setupSSE() {
 window.addEventListener("load", async () => {
 	await checkAuth();
 	setupEventListeners();
-	// setupSSE();
+	setupSSE();
 });

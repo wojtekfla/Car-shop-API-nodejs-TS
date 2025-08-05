@@ -13,7 +13,8 @@ export async function handleRequest(req, res) {
     if (pathname === '/users' ||
         pathname === '/me' ||
         pathname === '/users/delete' ||
-        pathname.match(/^\/users\/[\w-]+$/)) {
+        pathname.match(/^\/users\/[\w-]+$/) ||
+        pathname.startsWith('/fund/')) {
         return handleUserRoutes(req, res);
     }
     // Cars routes

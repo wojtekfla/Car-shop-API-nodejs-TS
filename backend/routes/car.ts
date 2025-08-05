@@ -133,7 +133,6 @@ export async function handleCarsRoutes(
 	}
 
 	if (method === 'POST' && pathname?.match(/^\/cars\/[\w-]+\/buy$/)) {
-		console.log(">>> RUTER: BUY REQUEST TRIGGERED", pathname);
 		await buyCar(req, res, pathname)
 	}
 }

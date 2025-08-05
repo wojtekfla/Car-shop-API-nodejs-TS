@@ -18,7 +18,8 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse) {
 		pathname === '/users' ||
 		pathname === '/me' ||
 		pathname === '/users/delete' ||
-		pathname.match(/^\/users\/[\w-]+$/)
+		pathname.match(/^\/users\/[\w-]+$/) ||
+		pathname.startsWith('/fund/')
 	) {
 		return handleUserRoutes(req, res)
 	}

@@ -181,19 +181,21 @@ export async function handleUserRoutes(
 		}
 
 		const currentUser = await getUserFromToken(token, USERS_DB);
+		console.log('user id', userId)
+		console.log('curr user', currentUser)
 		if (!currentUser) {
 			res.statusCode = 401; // 401 Unauthorized
 			return res.end(JSON.stringify({ error: "Invalid token" }));
 		}
 
-		if (currentUser.id !== userId) {
+		if (currentUser.role !== 'admin' && currentUser.id !== userId) {
 			res.statusCode = 403; // 403 Forbidden
 			return res.end(JSON.stringify({ error: "Forbidden action" }));
 		}
 
 		try {
 			const body = await getBodyData(req);
-			const { username, password } = JSON.parse(body);
+			const { username, password, role, balance } = JSON.parse(body);
 
 			const users = await readDataFromJson<User>(USERS_DB);
 
@@ -207,6 +209,8 @@ export async function handleUserRoutes(
 						password: password
 							? await bcrypt.hash(password, 10)
 							: user.password,
+						role: role ?? user.role,
+						balance: balance ?? user.balance
 					};
 					updatedUsers.push(updatedUser);
 				} else {
@@ -226,17 +230,42 @@ export async function handleUserRoutes(
 		}
 	}
 
+	if (method === "DELETE" && req.url?.match(/^\/users\/\w+$/)) {
+		const userId = req.url.split("/")[2];
+
+		const cookies = parseCookies(req);
+		const token = cookies.token;
+		if (!token) {
+			res.statusCode = 401;
+			return res.end(JSON.stringify({ error: "No token" }));
+		}
+
+		const currentUser = await getUserFromToken(token, USERS_DB);
+		if (!currentUser || currentUser.role !== "admin") {
+			res.statusCode = 403;
+			return res.end(JSON.stringify({ error: "Forbidden" }));
+		}
+
+		const users = await readDataFromJson<User>(USERS_DB);
+		const filteredUsers = users.filter((u) => u.id !== userId);
+		await saveDataToJson(USERS_DB, filteredUsers);
+
+		res.statusCode = 200;
+		res.setHeader("Content-Type", "application/json");
+		return res.end(JSON.stringify({ success: true }));
+	}
+
 	if (method === "DELETE" && pathname === "/users/delete") {
 		const cookies = parseCookies(req);
 		const token = cookies.token;
 		if (!token) {
-			res.statusCode = 401; // 401 Unauthorized
+			res.statusCode = 401;
 			return res.end(JSON.stringify({ error: "No token" }));
 		}
 
 		const currentUser = await getUserFromToken(token, USERS_DB);
 		if (!currentUser) {
-			res.statusCode = 401; // 401 Unauthorized
+			res.statusCode = 401;
 			return res.end(
 				JSON.stringify({ success: false, message: "Wrong token" })
 			);
@@ -247,13 +276,43 @@ export async function handleUserRoutes(
 		await saveDataToJson(USERS_DB, filteredUsers);
 
 		res.setHeader("Set-Cookie", "token=; HttpOnly; Max-Age=0; Path=/");
-
-		res.statusCode = 200; // 200 OK
-		res.setHeader("Content-Type", "application.json");
+		res.statusCode = 200;
+		res.setHeader("Content-Type", "application/json");
 		return res.end(
 			JSON.stringify({ success: true, message: "Profile has been deleted" })
 		);
 	}
+
+	// if (method === "DELETE" && req.url?.match(/^\/users\/\w+$/)) {
+	// 	const userId = req.url.split("/")[2];
+	// 	const cookies = parseCookies(req);
+	// 	const token = cookies.token;
+
+	// 	if (!token) {
+	// 		res.statusCode = 401; // 401 Unauthorized
+	// 		return res.end(JSON.stringify({ error: "No token" }));
+	// 	}
+
+	// 	const currentUser = await getUserFromToken(token, USERS_DB);
+	// 	if (!currentUser || currentUser.role !== 'admin') {
+	// 		res.statusCode = 403; // 403
+	// 		return res.end(
+	// 			JSON.stringify({ error: "Forbidden" })
+	// 		);
+	// 	}
+
+	// 	const users = await readDataFromJson<User>(USERS_DB);
+	// 	const filteredUsers = users.filter((u) => u.id !== currentUser.id);
+	// 	await saveDataToJson(USERS_DB, filteredUsers);
+
+	// 	res.setHeader("Set-Cookie", "token=; HttpOnly; Max-Age=0; Path=/");
+
+	// 	res.statusCode = 200; // 200 OK
+	// 	res.setHeader("Content-Type", "application.json");
+	// 	return res.end(
+	// 		JSON.stringify({ success: true, message: "Profile has been deleted" })
+	// 	);
+	// }
 
 	// GET users - tylko dla admina
 	if (method === "GET" && pathname === "/users") {
@@ -309,6 +368,48 @@ export async function handleUserRoutes(
 			return;
 		}
 		return;
+	}
+
+	if (method === "GET" && pathname?.startsWith("/fund/")) {
+		const cookies = parseCookies(req);
+		const token = cookies.token;
+
+		if (!token) {
+			res.statusCode = 401;
+			return res.end(JSON.stringify({ succes: false, message: "No token" }));
+		}
+		const currentUser = await getUserFromToken(token, USERS_DB);
+		if (!currentUser) {
+			res.statusCode = 403;
+			return res.end(
+				JSON.stringify({ success: false, message: "Unauthorized" })
+			);
+		}
+		const amountStr = pathname.split("/")[2];
+		const amount = Number(amountStr);
+		if (!amount || isNaN(amount) || amount > 100000) {
+			res.statusCode = 400;
+			return res.end(
+				JSON.stringify({ success: false, message: "Invalid amount" })
+			);
+		}
+		const users = await readDataFromJson<User>(USERS_DB);
+		const target = users.find((u) => u.id === currentUser.id);
+		if (!target) {
+			res.statusCode = 404;
+			return res.end(
+				JSON.stringify({ success: false, message: "User not found" })
+			);
+		}
+		target.balance += amount;
+		await saveDataToJson(USERS_DB, users);
+
+		res.statusCode = 302;
+		res.setHeader("Location", "/#home");
+		res.end()
+		// return res.end(
+		// 	JSON.stringify({ success: true, message: `+${amount} added` })
+		// );
 	}
 
 	res.statusCode = 404;

@@ -4,13 +4,27 @@
     "username": "admin",
     "password": "$2b$10$HUXt.uWXuyUdQC14/rAbXOF8hPyxYYI6Oec3QzAtgsMzwbLmC/iV6",
     "role": "admin",
-    "balance": 1500000
+    "balance": 500000
   },
   {
-    "id": "1754207669700",
+    "id": "1754395181679",
     "username": "wojtek",
-    "password": "$2b$10$NE5G8YS/bZepiRKyzHAA9.tCHUYAh7o1r052/Ac1ogiXJApsKrTS.",
+    "password": "$2b$10$UsTZRkk3Rbc3afMloE6IdOyg4aLQG8.hlt1rgPZQivyru/5BeyXhm",
     "role": "user",
-    "balance": 1000000
+    "balance": 100000
+  },
+  {
+    "id": "1754395191746",
+    "username": "rychu",
+    "password": "$2b$10$BFwpUQ4YC1lZAdsMwTseZO.HtDZ32DIoYOxWsbwOHVSYVweZ4ZToi",
+    "role": "user",
+    "balance": 100000
+  },
+  {
+    "id": "1754395212541",
+    "username": "zbychu2",
+    "password": "$2b$10$zaJQawf6cRyfhGyC.M76iOQeJIn2KDSmHhj9Xf5IHV.0iLOFaw1BW",
+    "role": "user",
+    "balance": 100000
   }
 ]
