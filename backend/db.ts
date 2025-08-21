@@ -1,4 +1,37 @@
-// DB INTERACTION
+import pg, { QueryResultRow } from "pg"
+
+
+export const pool = new pg.Pool({
+	host: 'localhost',
+	port: 5400,
+	user: 'postgres',
+	password: 'Homer123',
+	database: 'carshop',
+})
+
+// export const pool = new pg.Pool({
+// 	host: process.env.DB_HOST || 'localhost',
+// 	port: Number(process.env.DB_PORT) || 5400,
+// 	user: process.env.DB_USER || 'postgres',
+// 	password: process.env.DB_PASSWORD || 'Homer123',
+// 	database: process.env.DB_NAME || 'carshop',
+// })
+
+
+
+export async function query<T extends QueryResultRow>(text: string, params?: any[]) {
+	const result = await pool.query<T>(text, params)
+	return result.rows
+}
+
+
+
+
+
+
+
+
+/*
 import { IncomingMessage, ServerResponse } from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -151,4 +184,4 @@ export async function buyCar(
 	return res.end(JSON.stringify({ success: "Car purchased successfully" }));
 }
 
-
+*/

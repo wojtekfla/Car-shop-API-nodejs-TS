@@ -1,3 +1,4 @@
+/*
 import { IncomingMessage, ServerResponse } from "http";
 import path from "node:path";
 import fs from "fs/promises";
@@ -376,3 +377,6 @@ export async function handleUserRoutes(
 	res.statusCode = 404;
 	res.end("Not found");
 }
+
+
+*/
