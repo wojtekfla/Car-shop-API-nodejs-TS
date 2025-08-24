@@ -124,7 +124,8 @@ async function loadProfile() {
 
 		// sekcja admina
 		if (user.role === "admin") {
-			const usersRes = await fetch("http://localhost:3000/users", {
+			const usersRes = await fetch("http://localhost:3000/api/users", {
+			// const usersRes = await fetch("http://localhost:3000/users", {
 			credentials: "include",
 			});
 			if (!usersRes.ok) {
@@ -198,7 +199,8 @@ function showEditForm(user) {
  */
 async function updateUser(id, data) {
 	try {
-		const res = await fetch(`http://localhost:3000/users/${id}`, {
+		// const res = await fetch(`http://localhost:3000/users/${id}`, {
+		const res = await fetch(`http://localhost:3000/api/users/${id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json'},
 			credentials: 'include',
@@ -217,7 +219,8 @@ async function updateUser(id, data) {
  */
 async function deleteUser(id) {
 	try {
-		const res = await fetch(`http://localhost:3000/users/${id}`, {
+		// const res = await fetch(`http://localhost:3000/users/${id}`, {
+		const res = await fetch(`http://localhost:3000/api/users/${id}`, {
 			method: 'DELETE',
 			credentials: "include",
 		})
@@ -420,32 +423,6 @@ function setupEventListeners() {
 		});
 	}
 
-	// Formularz aktualizacji profilu
-	// renderProfileView();
-
-	// Formularz aktualizacji profilu - old version !
-	// const profileForm2 = document.getElementById("profileForm");
-	// if (profileForm) {
-	// 	profileForm.addEventListener("submit", async (e) => {
-	// 		e.preventDefault();
-	// 		const newUsername = document.getElementById("newUsername").value;
-	// 		const newPassword = document.getElementById("newPassword").value;
-	// 		const userId = currentUser.id;
-	// 		const res = await fetch(`http://localhost:3000/users/${userId}`, {
-	// 			method: "PUT",
-	// 			headers: { "Content-Type": "application/json" },
-	// 			body: JSON.stringify({ username: newUsername, password: newPassword }),
-	// 		});
-	// 		const data = await res.json();
-	// 		if (res.status === 200) {
-	// 			showMessage("Profil zaktualizowany", "success");
-	// 			await checkAuth();
-	// 			loadProfile();
-	// 		} else {
-	// 			showMessage(data.error || "Błąd aktualizacji profilu", "error");
-	// 		}
-	// 	});
-	// }
 
 	// Formularz usunięcia profilu
 	const profileDelete = document.getElementById("profile-delete");
@@ -456,7 +433,8 @@ function setupEventListeners() {
 			}
 
 			try {
-				const res = await fetch(`http://localhost:3000/users/delete`, {
+				// const res = await fetch(`http://localhost:3000/users/delete`, {
+				const res = await fetch(`http://localhost:3000/api/users/delete`, {
 					method: "DELETE",
 					credentials: "include",
 				});
@@ -519,46 +497,6 @@ function setupEventListeners() {
 	}
 }
 
-// do skasowania
-// async function renderProfileView() {
-// 	const response = await fetch("/auth", {
-// 		method: "GET",
-// 		credentials: "include",
-// 	});
-
-// 	if (!response.ok) {
-// 		showMessage("You have to login first");
-// 		showView("login");
-// 		return;
-// 	}
-
-// 	const user = await response.json();
-// 	const profileSection = document.getElementById("profile-view");
-// 	profileSection.innerHTML = `
-// 		<h2>Profil<h2>
-// 		<p><strong>Id:</strong> ${user.id}</p>
-// 		<p><strong>username:</strong> ${user.username}</p>
-// 		<p><strong>role:</strong> ${user.role}</p>
-// 		<p><strong>balance:</strong> ${user.balance}</p>
-// 		<button id="logout-btn"></button>
-
-// 	`;
-
-// 	const logoutButton = document.getElementById("logout-btn");
-// 	if (logoutButton) {
-// 		logoutButton.addEventListener("click", async () => {
-// 			await fetch("/logout", {
-// 				method: "POST",
-// 				credentials: "include",
-// 			});
-// 			showMessage("You have been logged out");
-// 			checkAuth();
-// 			showView("login");
-// 		});
-// 	}
-
-// 	showView("profile");
-// }
 
 /**
  * Prosty router – na podstawie fragmentu adresu URL (hash) wyświetla odpowiedni widok.

@@ -1,4 +1,20 @@
-"use strict";
+import express from 'express';
+import { getUserById, loginUser } from '../controllers/user.controller.js';
+const router = express.Router();
+// router.post('/login', loginUser)
+// router.post('/register', registerUser)
+// router.post('/logout', logoutUser)
+// router.get('/me', getCurrentUser)
+// admin
+// router.get("/api/users", authMiddleware, requireAdmin, getAllUsers);
+// router.put("/api/users/:id", authMiddleware, requireAdmin, updateUser);
+// router.delete("/api/users/:id", authMiddleware, requireAdmin, deleteUser);
+router.get('/api/users/:id', getUserById);
+router.post('/login', loginUser);
+export default router;
+// router.post('/login', async (req, res) => {
+// 	const { username, password } = req.body || {}
+// })
 /*
 import { IncomingMessage, ServerResponse } from "http";
 import path from "node:path";
