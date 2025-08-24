@@ -33,13 +33,12 @@ export const authMiddleware = async (
     if (!token) return res.status(401).json({message: 'No token'})
 
     const decodedUser = jwt.verify(token, process.env.SECRET_TOKEN!) as TokenPayload
-
-    const r = await pool.query(queries.getUserById, [decodedUser.id])
-    if (r.rows.length === 0) {
+    const result = await pool.query(queries.getUserById, [decodedUser.id])
+    if (result.rows.length === 0) {
       return res.status(401).json({message: 'User not found'})
     }
 
-    req.user = r.rows[0] as UserRow
+    req.user = result.rows[0] as UserRow
     next()
   } catch (error) {
     return res.status(401).json({message: 'Unauthorized'})

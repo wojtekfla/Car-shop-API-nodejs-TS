@@ -124,8 +124,7 @@ async function loadProfile() {
 
 		// sekcja admina
 		if (user.role === "admin") {
-			const usersRes = await fetch("http://localhost:3000/api/users", {
-			// const usersRes = await fetch("http://localhost:3000/users", {
+			const usersRes = await fetch("http://localhost:3000/users", {
 			credentials: "include",
 			});
 			if (!usersRes.ok) {
@@ -199,8 +198,7 @@ function showEditForm(user) {
  */
 async function updateUser(id, data) {
 	try {
-		// const res = await fetch(`http://localhost:3000/users/${id}`, {
-		const res = await fetch(`http://localhost:3000/api/users/${id}`, {
+		const res = await fetch(`http://localhost:3000/users/${id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json'},
 			credentials: 'include',
@@ -219,8 +217,7 @@ async function updateUser(id, data) {
  */
 async function deleteUser(id) {
 	try {
-		// const res = await fetch(`http://localhost:3000/users/${id}`, {
-		const res = await fetch(`http://localhost:3000/api/users/${id}`, {
+		const res = await fetch(`http://localhost:3000/users/${id}`, {
 			method: 'DELETE',
 			credentials: "include",
 		})
@@ -433,8 +430,7 @@ function setupEventListeners() {
 			}
 
 			try {
-				// const res = await fetch(`http://localhost:3000/users/delete`, {
-				const res = await fetch(`http://localhost:3000/api/users/delete`, {
+				const res = await fetch(`http://localhost:3000/users/delete`, {
 					method: "DELETE",
 					credentials: "include",
 				});

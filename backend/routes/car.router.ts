@@ -1,19 +1,11 @@
-import express from "express";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { pool } from '../db.js'
+
 import { Car } from "../types.js";
 
 const router = express.Router()
 const __fileName = fileURLToPath(import.meta.url);
 const __dirName = path.dirname(__fileName);
 
-const CARS_DB = path.join(process.cwd(), "db", "cars.json");
 
-const carsData: Car[] = JSON.parse(
-	fs.readFileSync(CARS_DB, "utf-8")
-);
 
 router.get("/", async (req, res) => {
 
@@ -25,14 +17,7 @@ router.get("/", async (req, res) => {
 	}
 });
 
-router.get("/:id", (req, res) => {
-	const id = req.params.id;
-	const foundCar = carsData.find((c) => c.id === id);
-	if (!foundCar) {
-		return res.status(404).json({ message: "Car not found" });
-	}
-	res.status(200).json(foundCar);
-});
+
 
 router.post('/', (req, res) => {
 	const { model, price } = req.body;
