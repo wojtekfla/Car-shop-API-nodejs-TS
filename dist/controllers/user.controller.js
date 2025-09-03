@@ -1,11 +1,15 @@
+import bcrypt from "bcrypt";
 import { pool } from "../db.js";
 import queries from "../queries.js";
+// import jwt from "jsonwebtoken";
+// import bcrypt from "bcrypt";
 export const getAllUsers = async (req, res) => {
     try {
         const result = await pool.query(queries.getAllUsers);
         res.json(result.rows);
     }
     catch (error) {
+        console.error(error);
         res.status(500).json({ message: "Error fetching users" });
     }
 };
@@ -20,16 +24,39 @@ export const getUserById = async (req, res) => {
 // PUT /users/:id
 export const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { username, role, balance } = req.body;
+    const { username, role, balance, password } = req.body;
+    console.log("req users/", req.body);
     try {
-        const result = await pool.query(queries.updateUser, [id, username, role, balance]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
+        const existingUser = await pool.query(queries.getUserById, [id]);
+        if (existingUser.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
         }
-        res.json(result.rows[0]);
+        if (req.user?.role === "admin") {
+            const result = await pool.query(queries.updateUserByAdmin, [
+                username ?? existingUser.rows[0].username,
+                role ?? existingUser.rows[0].role,
+                balance ?? existingUser.rows[0],
+                id,
+            ]);
+            console.log('res.rows', result.rows[0]);
+            return res.json(result.rows[0]);
+        }
+        if (req.user?.id === id) {
+            let hashedPassword = existingUser.rows[0].password;
+            if (password) {
+                hashedPassword = await bcrypt.hash(password, 10);
+            }
+            const result = await pool.query(queries.updateUser, [
+                id,
+                username ?? existingUser.rows[0].username,
+                hashedPassword,
+            ]);
+            return res.json(result.rows[0]);
+        }
+        return res.status(403).json({ message: "Forbidden" });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error updating user' });
+        res.status(500).json({ message: "Error updating user" });
     }
 };
 // DELETE /users/:id
@@ -38,31 +65,11 @@ export const deleteUser = async (req, res) => {
     try {
         const result = await pool.query(queries.deleteUser, [id]);
         if (result.rowCount === 0) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: "User not found" });
         }
-        res.json({ message: 'User deleted' });
+        res.json({ message: "User deleted" });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error deleting user' });
+        res.status(500).json({ message: "Error deleting user" });
     }
 };
-// export const loginUser = async (req: Request, res: Response) => {
-// 	const { username, password } = req.body;
-//   console.log('us name i pass', username, password)
-// 	if (!username || !password) {
-// 		return res.status(400).json({ message: "Missing username or password" });
-// 	}
-// 	try {
-// 		const result = await pool.query(queries.findByUserName, [username]);
-// 		const user: User = result.rows[0];
-//     console.log('user', user)
-// 		if (!user) return res.status(401).json({ error: "Invalid credentials" });
-// 		const validPassword = await bcrypt.compare(password, user.password);
-// 		if (!validPassword) return res.status(401).json({ error: "Invalid credentials" });
-// 		const token = generateToken(user);
-//     setCookie(res, token)
-//     res.json({message: `User: ${user.username} logged in`})
-// 	} catch (error) {
-// 		res.status(500).json({ error: "Login failed" });
-// 	}
-// };

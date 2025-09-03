@@ -17,25 +17,24 @@ export const register = async (req, res) => {
         // unikalność loginu
         const existing = await pool.query(queries.findByUserName, [username]);
         if (existing.rows.length > 0) {
-            return res.status(409).json({ message: 'Username already taken' });
+            return res.status(409).json({ message: "Username already taken" });
         }
         // hash hasła
         const hashed = await bcrypt.hash(password, 10);
         const newUserId = Date.now().toString();
-        // const newUser: User = {
-        // 		id: Date.now().toString(),
-        // 		username,
-        // 		password: hashedPassword,
-        // 		role: "user",
-        // 		balance: 100000,
-        // 	};
         // dodanie usera do bazy
-        const result = await pool.query(queries.createUser, [newUserId, username, hashed, 'user', 100000]);
+        const result = await pool.query(queries.createUser, [
+            newUserId,
+            username,
+            hashed,
+            "user",
+            100000,
+        ]);
         return res.status(201).json(result.rows[0]);
     }
     catch (error) {
-        console.error('registration error:', error);
-        return res.status(500).json({ message: 'Server error' });
+        console.error("registration error:", error);
+        return res.status(500).json({ message: "Server error" });
     }
 };
 //POST /login
@@ -43,11 +42,12 @@ export const login = async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {
-            return res.status(400).json({ message: "Username and password required" });
+            return res
+                .status(400)
+                .json({ message: "Username and password required" });
         }
         const result = await pool.query(queries.findByUserName, [username]);
         const user = result.rows[0];
-        console.log('user', user);
         if (!user)
             return res.status(401).json({ error: "Invalid credentials" });
         const validPassword = await bcrypt.compare(password, user.password);
@@ -64,7 +64,7 @@ export const login = async (req, res) => {
 };
 //POST /logout
 export const logout = (req, res) => {
-    res.clearCookie('token');
+    clearCookie(res);
     res.json({ message: "Logged out" });
 };
 export function setCookie(res, token) {
@@ -75,4 +75,29 @@ export function setCookie(res, token) {
         maxAge: 15 * 60 * 1000,
         path: "/",
     });
+}
+export function clearCookie(res) {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        path: "/",
+    });
+}
+//GET /hack/fund
+export async function hackFund(req, res) {
+    try {
+        const userId = req.user?.id;
+        if (!userId)
+            return res.status(401).json({ message: "Unathorized" });
+        const result = await pool.query(queries.fundUser, [50000, userId]);
+        if (result.rowCount === 0)
+            return res.status(404).json({ message: 'User not found' });
+        return res.redirect('/');
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+    ;
 }

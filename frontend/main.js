@@ -117,7 +117,7 @@ async function loadProfile() {
 			<button id="edit-profile-btn">Edit profile</button>
 		`;
 		document
-			.getElementById('edit-profile-btn')
+			.getElementById("edit-profile-btn")
 			.addEventListener("click", () => {
 				showEditForm(user);
 			});
@@ -125,14 +125,14 @@ async function loadProfile() {
 		// sekcja admina
 		if (user.role === "admin") {
 			const usersRes = await fetch("http://localhost:3000/users", {
-			credentials: "include",
+				credentials: "include",
 			});
 			if (!usersRes.ok) {
 				throw new Error("Error getting user list");
 			}
 
 			const users = await usersRes.json();
-			console.log('users list', users)
+			console.log("users list", users);
 			const userListDiv = document.getElementById("user-list");
 			userListDiv.innerHTML = `
 				<h3>All users</h3>
@@ -180,18 +180,34 @@ async function loadProfile() {
  * Prompt obsługi edycji user-a
  */
 function showEditForm(user) {
-	const username = prompt('New username', user.username)
-	const password = prompt('New password', user.password)
+	let username = user.username;
+	let password = undefined;
+	let role = user.role;
+	let balance = user.balance;
 
-	let role = user.role
-	let balance = user.balance
-
-	if (currentUser.role === 'admin' && currentUser.id !== user.id) {
-		role = prompt('New role (admin/user)', user.role) || user.role
-		balance = Number(prompt('New balance', user.balance)) || user.balance
+	if (currentUser.id === user.id) {
+		username = prompt("New username", user.username) || user.username;
+		const newPassword = prompt(
+			"New password (leave empty to keep unchanged)",
+			""
+		);
+		if (newPassword && newPassword.trim() !== "") {
+			password = newPassword;
+		}
 	}
 
-	updateUser(user.id, { username, password, role, balance})
+	if (currentUser.role === "admin" && currentUser.id !== user.id) {
+		username = prompt("New username", username) || user.username;
+		role = prompt("New role (admin/user)", user.role) || user.role;
+		balance = Number(prompt("New balance", user.balance)) || user.balance;
+	}
+
+	const data = { username, role, balance };
+	if (password) {
+		data.password = password;
+	}
+
+	updateUser(user.id, data);
 }
 /**
  * Update user-a
@@ -199,17 +215,17 @@ function showEditForm(user) {
 async function updateUser(id, data) {
 	try {
 		const res = await fetch(`http://localhost:3000/users/${id}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json'},
-			credentials: 'include',
-			body: JSON.stringify(data)
-		})
-		if (!res.ok) throw new Error ('Update error')
-		showNotification('User successfully updated')
-		loadProfile()
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify(data),
+		});
+		if (!res.ok) throw new Error("Update error");
+		showNotification("User successfully updated");
+		loadProfile();
 	} catch (error) {
-		console.error(error)
-		showMessage('Failed to update user', 'error')
+		console.error(error);
+		showMessage("Failed to update user", "error");
 	}
 }
 /**
@@ -218,12 +234,12 @@ async function updateUser(id, data) {
 async function deleteUser(id) {
 	try {
 		const res = await fetch(`http://localhost:3000/users/${id}`, {
-			method: 'DELETE',
+			method: "DELETE",
 			credentials: "include",
-		})
+		});
 	} catch (error) {
-	console.error(error);
-	showMessage("Failed to delete user", "error");	
+		console.error(error);
+		showMessage("Failed to delete user", "error");
 	}
 }
 
@@ -236,7 +252,6 @@ async function loadCars() {
 		if (res.status === 200) {
 			const cars = await res.json();
 			const divEl = document.getElementById("cars-list");
-			console.log("currentUser front", currentUser);
 
 			if (cars.length === 0) {
 				return (divEl.innerHTML = "Brak samochodów.");
@@ -310,9 +325,9 @@ async function editCar(carId, cars) {
 
 		const modelUpdated = prompt("Enter new model");
 		const priceUpdated = Number(prompt("Enter new price"));
-		if (!modelUpdated || isNaN(priceUpdated)) {
-			return showMessage("Wrong data", "error");
-		}
+		// if (!modelUpdated || isNaN(priceUpdated)) {
+		// 	return showMessage("Wrong data", "error");
+		// }
 
 		const res = await fetch(`http://localhost:3000/cars/${carId}`, {
 			method: "PUT",
@@ -420,7 +435,6 @@ function setupEventListeners() {
 		});
 	}
 
-
 	// Formularz usunięcia profilu
 	const profileDelete = document.getElementById("profile-delete");
 	if (profileDelete) {
@@ -465,6 +479,7 @@ function setupEventListeners() {
 			const data = await res.json();
 			if (res.status === 201) {
 				showMessage("Samochód dodany", "success");
+				e.target.reset();
 				loadCars();
 			} else {
 				showMessage(data.error || "Błąd dodawania samochodu", "error");
@@ -478,32 +493,45 @@ function setupEventListeners() {
 		buyCarForm.addEventListener("submit", async (e) => {
 			e.preventDefault();
 			const carId = document.getElementById("buyCarId").value;
-			const res = await fetch(`http://localhost:3000/cars/${carId}/buy`, {
+
+			try {
+				const res = await fetch(`http://localhost:3000/cars/${carId}/buy`, {
 				method: "POST",
-			});
-			const data = await res.json();
-			if (res.status === 200) {
+				credentials: "include",
+				});
+
+				const data = await res.json();
+
+				if (res.ok) {
 				showMessage("Samochód zakupiony", "success");
 				await loadCars();
-				await checkAuth(); // aktualizacja salda
-			} else {
+				await loadProfile()
+				// await checkAuth();
+				} else {
 				showMessage(data.error || "Błąd zakupu samochodu", "error");
+				}
+			} catch (error) {
+				console.error(err);
+      	showMessage("Błąd sieci", "error");
 			}
 		});
 	}
 }
 
-
 /**
  * Prosty router – na podstawie fragmentu adresu URL (hash) wyświetla odpowiedni widok.
  * Specjalnie obsługujemy #logout, aby "wylogować" użytkownika (symulacja).
  */
-function route() {
+async function route() {
 	const hash = window.location.hash || "#home";
 	const viewId = hash.substring(1) + "-view";
 
 	if (hash === "#logout") {
-		// "Wylogowanie" – resetujemy currentUser; w prawdziwej aplikacji warto by było mieć endpoint logout
+		const res = await fetch("http://localhost:3000/logout", {
+			method: "GET",
+			credentials: "include",
+		});
+		const data = await res.json()
 		currentUser = null;
 		renderNav();
 		showMessage("Wylogowano");
