@@ -1,8 +1,6 @@
 import bcrypt from "bcrypt";
 import { pool } from "../db.js";
 import queries from "../queries.js";
-// import jwt from "jsonwebtoken";
-// import bcrypt from "bcrypt";
 export const getAllUsers = async (req, res) => {
     try {
         const result = await pool.query(queries.getAllUsers);
@@ -25,7 +23,6 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { username, role, balance, password } = req.body;
-    console.log("req users/", req.body);
     try {
         const existingUser = await pool.query(queries.getUserById, [id]);
         if (existingUser.rows.length === 0) {
@@ -38,7 +35,6 @@ export const updateUser = async (req, res) => {
                 balance ?? existingUser.rows[0],
                 id,
             ]);
-            console.log('res.rows', result.rows[0]);
             return res.json(result.rows[0]);
         }
         if (req.user?.id === id) {

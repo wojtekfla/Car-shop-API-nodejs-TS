@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:17
+    container_name: carshop_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Homer123
+      POSTGRES_DB: carshop
+    ports:
+      - "5400:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: carshop_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_MAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  backend:
+    build: .
+    container_name: carshop_backend
+    restart: always
+    depends_on:
+    - db
+    ports:
+    - "3000:3000"
+    environment:
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: Homer123
+      PGDATABASE: carshop
+      PGPORT: 5432
+    volumes:
+    - ./backend:/app/backend
+    - ./frontend:/app/frontend
+    - /app/node_modules
+
+volumes:
+  pg_data: 
+  pgadmin_data: 
+    
+  

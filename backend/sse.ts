@@ -1,24 +1,30 @@
-import { IncomingMessage, ServerResponse } from "node:http";
+import { Request, Response } from "express";
+
+type SSEClient = Response;
+
+const clients: SSEClient[] = [];
 
 
-const clients: ServerResponse[] = []
+export function handleSSE(req: Request, res: Response) {
+	res.setHeader("Content-Type", "text/event-stream");
+	res.setHeader("Cache-Control", "no-cache");
+	res.setHeader("Connection", "keep-alive");
+	res.flushHeaders();
 
-export function handleSSE (req: IncomingMessage, res: ServerResponse) {
-	res.writeHead (200, {
-		'Content-Type': 'text/event-stream',
-		'Cache-Control': 'no-cache',
-		Connection: 'keep-alive',
-	})
-	res.write('\n')
-	clients.push(res)
+	const clientId = Date.now()
+	clients.push(res);
+	// console.log('clients', clients)
 
-	req.on('close', () => {
-		const index = clients.indexOf(res)
-		if (index !== -1) clients.splice(index, 1)
-	})
+	req.on("close", () => {
+		const index = clients.indexOf(res);
+		if (index !== -1) {
+			clients.splice(index, 1);
+		}
+	});
 }
 
 export function sendSSE(data: object) {
-  const payload = `data: ${JSON.stringify(data)}\n\n`;
-  clients.forEach((client) => client.write(payload));
+	const payload = `data: ${JSON.stringify(data)}\n\n`;
+	console.log('payload', payload)
+	clients.forEach((client) => client.write(payload));
 }

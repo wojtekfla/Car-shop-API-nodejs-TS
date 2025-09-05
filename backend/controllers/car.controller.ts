@@ -4,13 +4,13 @@ import { authMiddleware } from "../middleware.js";
 import queries, { carQueries } from "../queries.js";
 import { AuthRequest } from "../middleware.js";
 import { Car, User } from "../types.js";
+import { sendSSE } from "../sse.js";
 
 // GET /cars
 export const getAllCars = async (req: Request, res: Response) => {
 	try {
 		const result = await pool.query(carQueries.getAllCars);
-		const cars: Car[] = result.rows.map(mapCar)
-		console.log('cars', cars)
+		const cars: Car[] = result.rows.map(mapCar);
 		res.status(200).json(cars);
 	} catch (error) {
 		console.error(error);
@@ -59,14 +59,18 @@ export const updateCar = async (req: AuthRequest, res: Response) => {
 	const { model, price } = req.body;
 
 	try {
-    const existingCar = await pool.query(carQueries.getCarById, [id])
-    if (existingCar.rows.length === 0) {
-      return res.status(404).json({message: 'Car not found'})
-    }
-    const updatedModel = model ? model : existingCar.rows[0].model
-    const updatedPrice = price ? price : existingCar.rows[0].price
+		const existingCar = await pool.query(carQueries.getCarById, [id]);
+		if (existingCar.rows.length === 0) {
+			return res.status(404).json({ message: "Car not found" });
+		}
+		const updatedModel = model ? model : existingCar.rows[0].model;
+		const updatedPrice = price ? price : existingCar.rows[0].price;
 
-		const result = await pool.query(carQueries.updateCar, [updatedModel, updatedPrice, id]);
+		const result = await pool.query(carQueries.updateCar, [
+			updatedModel,
+			updatedPrice,
+			id,
+		]);
 		res.json(result.rows[0]);
 	} catch (error) {
 		console.error(error);
@@ -96,48 +100,60 @@ export const buyCar = async (req: AuthRequest, res: Response) => {
 	const userId = req.user?.id;
 
 	try {
-		const carData = await pool.query(carQueries.getCarById, [id])
+		const carData = await pool.query(carQueries.getCarById, [id]);
 		if (carData.rowCount === 0) {
 			return res.status(404).json({ message: "Car not found" });
 		}
-		const car: Car = mapCar(carData.rows[0])
-		console.log('car->', car)
-		
+		const car: Car = mapCar(carData.rows[0]);
+
 		if (car.ownerId) {
 			return res.status(400).json({ message: "Car already purchased" });
 		}
 
-		const userData = await pool.query(queries.getUserById, [userId])
+		const userData = await pool.query(queries.getUserById, [userId]);
 		if (userData.rowCount === 0) {
 			return res.status(404).json({ message: "User not found" });
 		}
-		const user: User = userData.rows[0]
+		const user: User = userData.rows[0];
 
 		if (user.balance < car.price) {
 			return res.status(400).json({ message: "Insufficient money" });
 		}
 
-		await pool.query('BEGIN')
+		await pool.query("BEGIN");
 
-		await pool.query("UPDATE cars SET owner_id = $1 WHERE id = $2 AND owner_id IS NULL", [userId, id])
+		await pool.query(
+			"UPDATE cars SET owner_id = $1 WHERE id = $2 AND owner_id IS NULL",
+			[userId, id]
+		);
 
-		await pool.query("UPDATE users SET balance = balance - $1 WHERE id = $2", [car.price, userId])
+		await pool.query("UPDATE users SET balance = balance - $1 WHERE id = $2", [
+			car.price,
+			userId,
+		]);
 
-		await pool.query("COMMIT")
+		await pool.query("COMMIT");
 
-		res.json({message: 'Car purchased successfuly'})
-		
+		sendSSE({
+			event: "car_purchased",
+			username: user.username,
+			model: car.model,
+			message: `Car ${car.model} has just been purchased by user ${user.username}`,
+		});
+
+		res.json({ message: "Car purchased successfuly", car });
+
 	} catch (error) {
-		console.error(error)
-    res.status(500).json({message: 'Error buing car'})
+		console.error(error);
+		res.status(500).json({ message: "Error buing car" });
 	}
 };
 
-function mapCar (row: any) {
+function mapCar(row: any) {
 	return {
 		id: row.id,
 		model: row.model,
 		price: row.price,
-		ownerId: row.owner_id
-	}
+		ownerId: row.owner_id,
+	};
 }

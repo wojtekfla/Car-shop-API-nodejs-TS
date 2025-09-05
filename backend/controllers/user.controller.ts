@@ -5,8 +5,6 @@ import { AuthRequest } from "../middleware.js";
 import queries from "../queries.js";
 import { User } from "../types";
 
-// import jwt from "jsonwebtoken";
-// import bcrypt from "bcrypt";
 
 export const getAllUsers = async (req: Request, res: Response) => {
 	try {
@@ -31,7 +29,6 @@ export const getUserById = async (req: Request, res: Response) => {
 export const updateUser = async (req: AuthRequest, res: Response) => {
 	const { id } = req.params;
 	const { username, role, balance, password } = req.body;
-	console.log("req users/", req.body);
 
 	try {
 		const existingUser = await pool.query(queries.getUserById, [id]);
@@ -46,7 +43,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 				balance ?? existingUser.rows[0],
 				id,
 			]);
-			console.log('res.rows', result.rows[0])
 			return res.json(result.rows[0]);
 		}
 

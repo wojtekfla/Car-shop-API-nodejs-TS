@@ -553,11 +553,16 @@ async function route() {
  */
 function setupSSE() {
 	const evtSource = new EventSource("/sse");
+
 	evtSource.onmessage = (event) => {
 		const msg = JSON.parse(event.data);
-		showNotification(
-			`SSE: ${msg.event} - Car ID: ${msg.carId}, Buyer ID: ${msg.buyerId}`
-		);
+		console.log('event', event)
+		console.log('msg', msg.message)
+
+		if (msg.event === "car_purchased") {
+			showNotification(
+				`SSE: ${msg.message} - wyswietliło się sukces`)
+		}
 	};
 }
 
