@@ -5,6 +5,24 @@ async function seed() {
 	try {
 		console.log("Seeding database ...");
 
+		await pool.query(
+			`CREATE TABLE IF NOT EXISTS users (
+				id TEXT PRIMARY KEY,
+    		username TEXT UNIQUE NOT NULL,
+    		password TEXT NOT NULL,
+    		role TEXT NOT NULL,
+    		balance INTEGER NOT NULL DEFAULT 0)`
+		);
+
+		await pool.query(
+			`CREATE TABLE IF NOT EXISTS cars (
+				id TEXT PRIMARY KEY,
+        model TEXT NOT NULL,
+        price INT NOT NULL,
+        owner_id TEXT REFERENCES users(id)
+			)`
+		);
+
 		const adminCheck = await pool.query(
 			"SELECT * FROM users WHERE role = 'admin' LIMIT 1"
 		);
@@ -61,20 +79,21 @@ async function seed() {
 				},
 			];
 
-      for (const car of cars) {
-        await pool.query(
-          "INSERT INTO cars (id, model, price, owner_id) VALUES ($1, $2, $3, NULL)", [car.id, car.model, car.price]
-        )
-      }
-      console.log('Car added to database')
+			for (const car of cars) {
+				await pool.query(
+					"INSERT INTO cars (id, model, price, owner_id) VALUES ($1, $2, $3, NULL)",
+					[car.id, car.model, car.price]
+				);
+			}
+			console.log("Car added to database");
 		} else {
-      console.log('Cars already exist, skipping')
-    }
+			console.log("Cars already exist, skipping");
+		}
 	} catch (error) {
-    console.error('Seed error', error)
-  } finally {
-    await pool.end()
-  }
+		console.error("Seed error", error);
+	} finally {
+		await pool.end();
+	}
 }
 
-seed()
+seed();

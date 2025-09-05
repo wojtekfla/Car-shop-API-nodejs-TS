@@ -1,4 +1,4 @@
-version: '3.8'
+
 services:
   db:
     image: postgres:17
@@ -18,12 +18,14 @@ services:
     container_name: carshop_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_MAIL: admin@admin.com
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
 
   backend:
     build: .
