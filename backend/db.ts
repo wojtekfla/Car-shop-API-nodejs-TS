@@ -1,22 +1,17 @@
-// DB INTERACTION
+import { Pool, QueryResultRow } from "pg"
 
-import { IncomingMessage } from "node:http"
+export const pool = new Pool({
+	host: process.env.PGHOST || "localhost",
+	port: Number((process.env.PGPORT || "5432").trim()),
+	user: process.env.PGUSER || "postgres",
+	password: process.env.PGPASSWORD || "Homer123",
+	database: process.env.PGDATABASE || "carshop",
+})
 
-// odczyt body 
-export function getBodyData (req:IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    try {
-      let body:string = ''
-
-      req.on('data', (chunk:any) => {
-        body += chunk.toString()
-      })
-
-      req.on('end', () => {
-        resolve(body)
-      })
-    } catch (error) {
-      reject(error)
-    }
-  })
+export async function query<T extends QueryResultRow>(text: string, params?: any[]) {
+	const result = await pool.query<T>(text, params)
+	return result.rows
 }
+
+
+
